@@ -1,0 +1,250 @@
+.audio-player {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #e7440d 0%, #d13a0b 100%);
+    color: white;
+    padding: 15px 20px;
+    z-index: 1000;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+    animation: slideUp 0.3s ease;
+}
+
+.audio-player-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.track-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+}
+
+.track-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.track-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.track-details {
+    min-width: 0;
+    flex: 1;
+}
+
+.track-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 4px 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.track-author {
+    font-size: 12px;
+    margin: 0;
+    opacity: 0.8;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.progress-container {
+    flex: 2;
+    min-width: 200px;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    cursor: pointer;
+    position: relative;
+    margin-bottom: 5px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: white;
+    border-radius: 2px;
+    transition: width 0.1s ease;
+}
+
+.time-display {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+}
+
+.control-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.control-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.control-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.play-btn {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    font-size: 20px;
+}
+
+.play-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.volume-container {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.volume-btn {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.volume-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.volume-slider {
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    margin-bottom: 10px;
+    animation: fadeIn 0.2s ease;
+}
+
+.volume-input {
+    width: 80px;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+.volume-input::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #e7440d;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.volume-input::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #e7440d;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .audio-player-content {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .track-info {
+        order: 1;
+        width: 100%;
+    }
+    
+    .progress-container {
+        order: 2;
+        width: 100%;
+    }
+    
+    .controls {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .volume-container {
+        order: 4;
+        position: static;
+    }
+    
+    .volume-slider {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+    }
+} 

@@ -1,0 +1,358 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { commonStyles } from '../../constants/commonStyles';
+import { colors } from '../../constants/colors';
+import { apiFunctions } from '../../apiService/apiFunctions';
+import { useAuth } from '../../context/AuthContext';
+
+// Inline components to avoid import issues
+const PrimaryTextInput = ({ 
+    placeholder, 
+    value, 
+    onChangeText, 
+    secureEntry = false, 
+    imageSource,
+    style = {},
+    ...props 
+}) => {
+    return (
+        <div style={{
+            position: 'relative',
+            marginBottom: 15,
+            ...style
+        }}>
+            {imageSource && (
+                <img 
+                    src={imageSource} 
+                    alt="icon" 
+                    style={{
+                        position: 'absolute',
+                        left: 15,
+                        top: '50%',
+                        transform: 'translateY(-50%)',
+                        width: 20,
+                        height: 20,
+                        zIndex: 1
+                    }}
+                />
+            )}
+            <input
+                type={secureEntry ? 'password' : 'text'}
+                placeholder={placeholder}
+                value={value}
+                onChange={(e) => onChangeText(e.target.value)}
+                style={{
+                    width: '100%',
+                    padding: '15px',
+                    paddingLeft: imageSource ? '50px' : '15px',
+                    border: `1px solid ${colors.lightGrey}`,
+                    borderRadius: 8,
+                    fontSize: 16,
+                    outline: 'none',
+                    transition: 'border-color 0.3s ease',
+                    backgroundColor: colors.white
+                }}
+                onFocus={(e) => {
+                    e.target.style.borderColor = colors.appPrimary;
+                }}
+                onBlur={(e) => {
+                    e.target.style.borderColor = colors.lightGrey;
+                }}
+                {...props}
+            />
+        </div>
+    );
+};
+
+const CommonButton = ({ 
+    buttonTitle, 
+    onPress, 
+    isLoading = false, 
+    customStyles = {}, 
+    customTextStyles = {},
+    disabled = false
+}) => {
+    return (
+        <button
+            onClick={onPress}
+            disabled={disabled || isLoading}
+            style={{
+                backgroundColor: disabled ? colors.grey : colors.appPrimary,
+                color: colors.white,
+                padding: '12px 24px',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 16,
+                fontWeight: '600',
+                cursor: disabled ? 'not-allowed' : 'pointer',
+                transition: 'background-color 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: 48,
+                ...customStyles
+            }}
+            onMouseEnter={(e) => {
+                if (!disabled) {
+                    e.target.style.backgroundColor = '#d13a0b';
+                }
+            }}
+            onMouseLeave={(e) => {
+                if (!disabled) {
+                    e.target.style.backgroundColor = colors.appPrimary;
+                }
+            }}
+        >
+            {isLoading ? (
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div style={{
+                        width: 20,
+                        height: 20,
+                        border: `2px solid ${colors.white}`,
+                        borderTop: `2px solid transparent`,
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        marginRight: 8
+                    }}></div>
+                    Loading...
+                </div>
+            ) : (
+                <span style={customTextStyles}>{buttonTitle}</span>
+            )}
+        </button>
+    );
+};
+
+const ErrorToast = ({ message, isVisible, onClose }) => {
+    if (!isVisible) return null;
+
+    return (
+        <div style={{
+            position: 'fixed',
+            top: 20,
+            right: 20,
+            backgroundColor: colors.red,
+            color: colors.white,
+            padding: '15px 20px',
+            borderRadius: 8,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            zIndex: 1000,
+            maxWidth: 300,
+            animation: 'slideIn 0.3s ease'
+        }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>{message}</span>
+                <button
+                    onClick={onClose}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: colors.white,
+                        fontSize: 18,
+                        cursor: 'pointer',
+                        marginLeft: 10
+                    }}
+                >
+                    ×
+                </button>
+            </div>
+        </div>
+    );
+};
+
+const Login = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState('');
+    const [showError, setShowError] = useState(false);
+
+    const navigate = useNavigate();
+    const { login } = useAuth();
+
+    const onLoginPress = async () => {
+        if (!email) {
+            setErrorMessage('Please enter a valid email address to continue');
+            setShowError(true);
+            return;
+        }
+        
+        if (!password) {
+            setErrorMessage('Password cannot be empty');
+            setShowError(true);
+            return;
+        }
+
+        try {
+            setIsLoading(true);
+            const loginData = {
+                email: email,
+                password: password,
+                device_token: 'web',
+                device_type: 'web',
+                fcm_token: 'web-token'
+            };
+
+            const response = await apiFunctions.login(loginData);
+            setIsLoading(false);
+
+            // Check if the response has data and success property
+            if (response && response.data) {
+                if (response.data.success === true) {
+                    const token = response.data.token;
+                    const userData = response.data.user || response.data;
+                    login(userData, token);
+                    navigate('/home');
+                } else {
+                    // Handle unsuccessful login
+                    setErrorMessage(response.data.message || 'Login failed. Please check your credentials.');
+                    setShowError(true);
+                }
+            } else {
+                // Handle case where response structure is different
+                setErrorMessage('Invalid response from server');
+                setShowError(true);
+            }
+        } catch (err) {
+            setIsLoading(false);
+            console.error('Login error:', err);
+            
+            // Handle different types of errors
+            if (err.response && err.response.data) {
+                setErrorMessage(err.response.data.message || 'Login failed');
+            } else if (err.message) {
+                setErrorMessage(err.message);
+            } else {
+                setErrorMessage('Something went wrong. Please try again.');
+            }
+            setShowError(true);
+        }
+    };
+
+    const onForgotPasswordPress = () => {
+        navigate('/forgot-password');
+    };
+
+    const onSignUpPress = () => {
+        navigate('/signup');
+    };
+
+    return (
+        <div style={commonStyles.fullScreenContainer}>
+            <div style={commonStyles.fullScreenInnerContainer}>
+                <div style={{ 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    alignItems: 'center',
+                    minHeight: '100vh',
+                    paddingTop: 40
+                }}>
+                    <div style={{
+                        width: 200,
+                        height: 150,
+                        backgroundColor: colors.appPrimary,
+                        borderRadius: 12,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: 20
+                    }}>
+                        <span style={{
+                            color: colors.white,
+                            fontSize: 24,
+                            fontWeight: 'bold'
+                        }}>
+                            KitabCloud
+                        </span>
+                    </div>
+                    
+                    <h1 style={commonStyles.textLightBold(32, { 
+                        color: colors.black, 
+                        marginBottom: 10, 
+                        textAlign: 'center' 
+                    })}>
+                        Login
+                    </h1>
+                    
+                    <p style={commonStyles.textLightNormal(18, { 
+                        color: colors.grey, 
+                        marginBottom: 30, 
+                        textAlign: 'center',
+                        maxWidth: 400
+                    })}>
+                        Enter your email and password to login to your account
+                    </p>
+
+                    <div style={{ width: '100%', maxWidth: 400 }}>
+                        <PrimaryTextInput 
+                            placeholder='Email' 
+                            value={email} 
+                            onChangeText={setEmail}
+                        />
+                        
+                        <PrimaryTextInput 
+                            placeholder='Password' 
+                            value={password} 
+                            onChangeText={setPassword}
+                            secureEntry={true}
+                        />
+                        
+                        <button
+                            onClick={onForgotPasswordPress}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                color: colors.appPrimary,
+                                fontSize: 16,
+                                cursor: 'pointer',
+                                alignSelf: 'flex-end',
+                                marginBottom: 20
+                            }}
+                        >
+                            Forgot Password?
+                        </button>
+                        
+                        <CommonButton 
+                            isLoading={isLoading} 
+                            buttonTitle='Login' 
+                            onPress={onLoginPress} 
+                            customStyles={{ 
+                                width: '100%', 
+                                marginBottom: 20 
+                            }} 
+                        />
+                        
+                        <p style={commonStyles.textLightNormal(16, { 
+                            color: colors.black, 
+                            textAlign: 'center' 
+                        })}>
+                            New to KitabCloud?
+                            <button
+                                onClick={onSignUpPress}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: colors.appPrimary,
+                                    fontSize: 16,
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    marginLeft: 5
+                                }}
+                            >
+                                Register Now
+                            </button>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <ErrorToast 
+                message={errorMessage} 
+                isVisible={showError} 
+                onClose={() => setShowError(false)} 
+            />
+        </div>
+    );
+};
+
+export default Login; 
