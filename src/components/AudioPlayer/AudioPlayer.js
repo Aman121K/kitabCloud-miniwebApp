@@ -29,6 +29,7 @@ const AudioPlayer = () => {
     } = useAudioPlayer();
 
     const [showVolume, setShowVolume] = useState(false);
+    const [showFullPlayer, setShowFullPlayer] = useState(false);
 
     if (!currentTrack) return null;
 
@@ -52,9 +53,63 @@ const AudioPlayer = () => {
         setVolumeLevel(newVolume);
     };
 
+    // Mini FAB with KitabCloud logo
+    if (!showFullPlayer) {
+        return (
+            <div className="audio-player-fab">
+                <div className="fab-container" onClick={() => setShowFullPlayer(true)}>
+                    <div className="fab-logo">
+                        <img 
+                            src="https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg" 
+                            alt="KitabCloud"
+                            style={{
+                                width: '40px',
+                                height: '40px',
+                                borderRadius: '50%',
+                                objectFit: 'cover'
+                            }}
+                        />
+                    </div>
+                    <div className="fab-play-button" onClick={(e) => {
+                        e.stopPropagation();
+                        handlePlayPause();
+                    }}>
+                        {isPlaying ? '⏸️' : '▶️'}
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    // Full Audio Player
     return (
         <div className="audio-player">
             <div className="audio-player-content">
+                {/* Header with close button */}
+                <div className="player-header">
+                    <div className="player-logo">
+                        <img 
+                            src="https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg" 
+                            alt="KitabCloud"
+                            style={{
+                                width: '30px',
+                                height: '30px',
+                                borderRadius: '50%',
+                                objectFit: 'cover'
+                            }}
+                        />
+                        <span style={{ marginLeft: '10px', fontWeight: 'bold', color: colors.appPrimary }}>
+                            KitabCloud
+                        </span>
+                    </div>
+                    <button 
+                        className="close-btn"
+                        onClick={() => setShowFullPlayer(false)}
+                    >
+                        ✕
+                    </button>
+                </div>
+
                 {/* Track Info */}
                 <div className="track-info">
                     <div className="track-image">

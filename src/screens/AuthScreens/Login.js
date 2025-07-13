@@ -247,23 +247,25 @@ const Login = () => {
                     minHeight: '100vh',
                     paddingTop: 40
                 }}>
+                    {/* KitabCloud Logo */}
                     <div style={{
                         width: 200,
                         height: 150,
-                        backgroundColor: colors.appPrimary,
-                        borderRadius: 12,
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         marginBottom: 20
                     }}>
-                        <span style={{
-                            color: colors.white,
-                            fontSize: 24,
-                            fontWeight: 'bold'
-                        }}>
-                            KitabCloud
-                        </span>
+                        <img 
+                            src="https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg"
+                            alt="KitabCloud Logo"
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                borderRadius: 12
+                            }}
+                        />
                     </div>
                     
                     <h1 style={commonStyles.textLightBold(32, { 

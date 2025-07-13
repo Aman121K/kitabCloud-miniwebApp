@@ -6,9 +6,9 @@ import Login from './screens/AuthScreens/Login';
 import Signup from './screens/AuthScreens/Signup';
 import ForgotPassword from './screens/AuthScreens/ForgotPassword';
 import HomeScreen from './screens/MainScreens/HomeScreen/HomeScreen';
-import BookDetails from './screens/MainScreens/OtherScreens/BookDetails';
 import SearchScreen from './screens/MainScreens/SearchScreen/SearchScreen';
 import ProfileScreen from './screens/MainScreens/ProfileScreen/ProfileScreen';
+import BookDetails from './screens/MainScreens/OtherScreens/BookDetails';
 import PlayerScreen from './screens/MainScreens/PlayerScreen/PlayerScreen';
 import AudioPlayer from './components/AudioPlayer/AudioPlayer';
 import './App.css';
@@ -70,11 +70,6 @@ const AppContent = () => {
                         <HomeScreen />
                     </ProtectedRoute>
                 } />
-                <Route path="/book/:id" element={
-                    <ProtectedRoute>
-                        <BookDetails />
-                    </ProtectedRoute>
-                } />
                 <Route path="/search" element={
                     <ProtectedRoute>
                         <SearchScreen />
@@ -83,6 +78,11 @@ const AppContent = () => {
                 <Route path="/profile" element={
                     <ProtectedRoute>
                         <ProfileScreen />
+                    </ProtectedRoute>
+                } />
+                <Route path="/book/:id" element={
+                    <ProtectedRoute>
+                        <BookDetails />
                     </ProtectedRoute>
                 } />
                 <Route path="/player" element={
