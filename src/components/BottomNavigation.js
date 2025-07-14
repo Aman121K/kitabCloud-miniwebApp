@@ -1,15 +1,16 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { colors } from '../constants/colors';
+import { MdHome, MdSearch, MdPerson } from 'react-icons/md';
 
 const BottomNavigation = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
     const navItems = [
-        { path: '/home', label: 'Home', icon: '��' },
-        { path: '/search', label: 'Search', icon: '��' },
-        { path: '/profile', label: 'Profile', icon: '👤' }
+        { path: '/home', label: 'Home', icon: <MdHome /> },
+        { path: '/search', label: 'Search', icon:  <MdSearch /> },
+        { path: '/profile', label: 'Profile', icon:  <MdPerson /> }
     ];
 
     return (
@@ -55,7 +56,7 @@ const BottomNavigation = () => {
                             }
                         }}
                     >
-                        <span style={{ fontSize: 20, marginBottom: 4 }}>
+                        <span style={{ fontSize: 24, marginBottom: 4 }}>
                             {item.icon}
                         </span>
                         <span style={{
