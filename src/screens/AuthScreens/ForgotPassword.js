@@ -211,73 +211,86 @@ const ForgotPassword = () => {
                 }}>
                     {/* KitabCloud Logo */}
                     <div style={{
-                        width: 200,
-                        height: 150,
+                        width: '100%',
+                        maxWidth: 380,
+                        background: '#fff',
+                        borderRadius: 12,
+                        boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+                        padding: '32px 20px',
+                        margin: '0 auto',
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
-                        justifyContent: 'center',
-                        marginBottom: 20
                     }}>
-                        <img 
-                            src="https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg"
-                            alt="KitabCloud Logo"
-                            style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'contain',
-                                borderRadius: 12
-                            }}
-                        />
-                    </div>
-                    
-                    <h1 style={commonStyles.textLightBold(32, { 
-                        color: colors.black, 
-                        marginBottom: 10, 
-                        textAlign: 'center' 
-                    })}>
-                        Forgot Password
-                    </h1>
-                    
-                    <p style={commonStyles.textLightNormal(18, { 
-                        color: colors.grey, 
-                        marginBottom: 30, 
-                        textAlign: 'center',
-                        maxWidth: 400
-                    })}>
-                        Enter your email address to reset your password
-                    </p>
+                        <div style={{
+                            width: 200,
+                            height: 150,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: 20
+                        }}>
+                            <img 
+                                src="https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg"
+                                alt="KitabCloud Logo"
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'contain',
+                                    borderRadius: 12
+                                }}
+                            />
+                        </div>
+                        
+                        <h1 style={commonStyles.textLightBold(32, { 
+                            color: colors.black, 
+                            marginBottom: 10, 
+                            textAlign: 'center' 
+                        })}>
+                            Forgot Password
+                        </h1>
+                        
+                        <p style={commonStyles.textLightNormal(18, { 
+                            color: colors.grey, 
+                            marginBottom: 30, 
+                            textAlign: 'center',
+                            maxWidth: 400
+                        })}>
+                            Enter your email address to reset your password
+                        </p>
 
-                    <div style={{ width: '100%', maxWidth: 400 }}>
-                        <PrimaryTextInput 
-                            placeholder='Email' 
-                            value={email} 
-                            onChangeText={setEmail}
-                        />
-                        
-                        <CommonButton 
-                            isLoading={isLoading} 
-                            buttonTitle='Reset Password' 
-                            onPress={onResetPassword} 
-                            customStyles={{ 
-                                width: '100%', 
-                                marginBottom: 20 
-                            }} 
-                        />
-                        
-                        <button
-                            onClick={onBackToLogin}
-                            style={{
-                                background: 'none',
-                                border: 'none',
-                                color: colors.appPrimary,
-                                fontSize: 16,
-                                cursor: 'pointer',
-                                width: '100%',
-                                textAlign: 'center'
-                            }}
-                        >
-                            Back to Login
-                        </button>
+                        <div style={{ width: '100%', maxWidth: 400 }}>
+                            <PrimaryTextInput 
+                                placeholder='Email' 
+                                value={email} 
+                                onChangeText={setEmail}
+                            />
+                            
+                            <CommonButton 
+                                isLoading={isLoading} 
+                                buttonTitle='Reset Password' 
+                                onPress={onResetPassword} 
+                                customStyles={{ 
+                                    width: '100%', 
+                                    marginBottom: 20 
+                                }} 
+                            />
+                            
+                            <button
+                                onClick={onBackToLogin}
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    color: colors.appPrimary,
+                                    fontSize: 16,
+                                    cursor: 'pointer',
+                                    width: '100%',
+                                    textAlign: 'center'
+                                }}
+                            >
+                                Back to Login
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -1,0 +1,29 @@
+.filter-bar {
+  display: flex;
+  gap: 10px;
+  padding: 10px 15px;
+  overflow-x: auto;
+  background: #fff;
+  border-bottom: 1px solid #eee;
+}
+
+.filter-tab {
+  background: #f5f5f5;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 18px;
+  font-size: 16px;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+
+.filter-tab.selected {
+  background: #e7440d;
+  color: #fff;
+  font-weight: bold;
+}
+
+.filter-tab:focus {
+  outline: none;
+} 

@@ -7,6 +7,7 @@ import { colors } from '../constants/colors';
 import { commonStyles } from '../constants/commonStyles';
 
 const BookCard = ({ book }) => {
+    console.log("full image path>>",book)
     const { token } = useAuth();
     const { playTrack, currentTrack, isPlaying } = useAudioPlayer();
     const navigate = useNavigate();
@@ -58,7 +59,7 @@ const BookCard = ({ book }) => {
         >
             <div style={{ position: 'relative' }}>
                 <img 
-                    src={book.cover_image || book.image || '/dummy-book.png'} 
+                    src={book.coverimage || book.image || '/dummy-book.png'} 
                     alt={book.title}
                     style={{
                         width: '100%',
