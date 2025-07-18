@@ -5,6 +5,8 @@ import { apiFunctions } from '../../../apiService/apiFunctions';
 import { colors } from '../../../constants/colors';
 import { commonStyles } from '../../../constants/commonStyles';
 import BookCard from '../../../components/BookCard';
+import AudioPlayer from '../../../components/AudioPlayer/AudioPlayer';
+import { useAudioPlayer } from '../../../context/AudioPlayerContext';
 
 const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 const FALLBACK_IMAGE = '/favicon.ico';
@@ -23,6 +25,7 @@ const BookDetails = () => {
     const [moreBooks, setMoreBooks] = useState([]); // More from author
     const [isPlayingFull, setIsPlayingFull] = useState(false);
     const [fullAudio, setFullAudio] = useState(null);
+    const { playTrack } = useAudioPlayer();
 
     useEffect(() => {
         if (token && id) {
@@ -50,41 +53,55 @@ const BookDetails = () => {
     // const fetchMoreFromAuthor = async (authorId) => { ... };
 
     const handlePlaySample = () => {
-        if (book?.audio_url) {
-            if (audio && !audio.paused) {
-                audio.pause();
-                setIsPlaying(false);
-            } else {
-                if (audio) {
-                    audio.play();
-                } else {
-                    const newAudio = new Audio(FILE_BASE_URL + book.audio_url);
-                    newAudio.addEventListener('ended', () => setIsPlaying(false));
-                    setAudio(newAudio);
-                    newAudio.play();
-                }
-                setIsPlaying(true);
-            }
+        if (book?.bookaudio) {
+            // if (audio && !audio.paused) {
+            //     audio.pause();
+            //     setIsPlaying(false);
+            // } else {
+            //     if (audio) {
+            //         audio.play();
+            //     } else {
+            //         const newAudio = new Audio(FILE_BASE_URL + book.bookaudio);
+            //         newAudio.addEventListener('ended', () => setIsPlaying(false));
+            //         setAudio(newAudio);
+            //         newAudio.play();
+            //     }
+            //     setIsPlaying(true);
+            // }
+            playTrack({
+                id: book.id + '-sample',
+                title: book.title + ' (Sample)',
+                author: book.author,
+                cover_image: book.coverimage || book.image,
+                audio_url: (book.bookaudio.startsWith('http') ? book.bookaudio : FILE_BASE_URL + book.bookaudio),
+            });
         }
     };
 
     const handlePlayFullBook = () => {
         if (book?.bookaudio) {
-            if (fullAudio && !fullAudio.paused) {
-                fullAudio.pause();
-                setIsPlayingFull(false);
-            } else {
-                if (fullAudio) {
-                    fullAudio.play();
-                } else {
-                    const url = book.bookaudio.startsWith('http') ? book.bookaudio : FILE_BASE_URL + book.bookaudio;
-                    const newAudio = new Audio(url);
-                    newAudio.addEventListener('ended', () => setIsPlayingFull(false));
-                    setFullAudio(newAudio);
-                    newAudio.play();
-                }
-                setIsPlayingFull(true);
-            }
+            // if (fullAudio && !fullAudio.paused) {
+            //     fullAudio.pause();
+            //     setIsPlayingFull(false);
+            // } else {
+            //     if (fullAudio) {
+            //         fullAudio.play();
+            //     } else {
+            //         const url = book.bookaudio.startsWith('http') ? book.bookaudio : FILE_BASE_URL + book.bookaudio;
+            //         const newAudio = new Audio(url);
+            //         newAudio.addEventListener('ended', () => setIsPlayingFull(false));
+            //         setFullAudio(newAudio);
+            //         newAudio.play();
+            //     }
+            //     setIsPlayingFull(true);
+            // }
+            playTrack({
+                id: book.id,
+                title: book.title,
+                author: book.author,
+                cover_image: book.coverimage || book.image,
+                audio_url: (book.bookaudio.startsWith('http') ? book.bookaudio : FILE_BASE_URL + book.bookaudio),
+            });
         }
     };
 
@@ -270,6 +287,8 @@ const BookDetails = () => {
                     </div>
                 </div> */}
             </div>
+            {/* Render AudioPlayer only if audio is playing */}
+             <AudioPlayer />
         </div>
     );
 };
