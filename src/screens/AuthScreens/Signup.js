@@ -6,14 +6,14 @@ import { apiFunctions } from '../../apiService/apiFunctions';
 import { useAuth } from '../../context/AuthContext';
 
 // Inline components
-const PrimaryTextInput = ({ 
-    placeholder, 
-    value, 
-    onChangeText, 
-    secureEntry = false, 
+const PrimaryTextInput = ({
+    placeholder,
+    value,
+    onChangeText,
+    secureEntry = false,
     imageSource,
     style = {},
-    ...props 
+    ...props
 }) => {
     return (
         <div style={{
@@ -22,9 +22,9 @@ const PrimaryTextInput = ({
             ...style
         }}>
             {imageSource && (
-                <img 
-                    src={imageSource} 
-                    alt="icon" 
+                <img
+                    src={imageSource}
+                    alt="icon"
                     style={{
                         position: 'absolute',
                         left: 15,
@@ -64,11 +64,11 @@ const PrimaryTextInput = ({
     );
 };
 
-const CommonButton = ({ 
-    buttonTitle, 
-    onPress, 
-    isLoading = false, 
-    customStyles = {}, 
+const CommonButton = ({
+    buttonTitle,
+    onPress,
+    isLoading = false,
+    customStyles = {},
     customTextStyles = {},
     disabled = false
 }) => {
@@ -217,13 +217,23 @@ const Signup = () => {
         try {
             setIsLoading(true);
             const signupData = {
+
+                // full_name: name.trim(),
+                // email: email.trim(),
+                // password: password.trim(),
+                // password_confirmation: cPassword.trim(),
+                // device_type: Platform.OS,
+                // fcm_token: fcmToken,
+                // country: countryName
                 full_name: formData.full_name,
                 email: formData.email,
-                password: formData.password,
-                phone: formData.phone,
-                device_token: 'web',
+                password: formData.confirm_password.trim(),
+                password_confirmation: formData.confirm_password.trim(),
                 device_type: 'web',
-                fcm_token: 'web-token'
+                fcm_token: 'web-token',
+                country: 'India'
+
+                // phone: formData.phone,
             };
 
             const response = await apiFunctions.signUp(signupData);
@@ -263,13 +273,41 @@ const Signup = () => {
     return (
         <div style={commonStyles.fullScreenContainer}>
             <div style={commonStyles.fullScreenInnerContainer}>
-                <div style={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
                     minHeight: '100vh',
                     paddingTop: 40
                 }}>
+                    <div style={{
+                        width: 200,
+                        height: 150,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: 20
+                    }}>
+                        <img
+                            src="https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg"
+                            alt="KitabCloud Logo"
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                borderRadius: 12
+                            }}
+                        />
+                    </div>
+
+                    <h1 style={commonStyles.textLightBold(32, {
+                        color: colors.black,
+                        marginBottom: 10,
+                        textAlign: 'center'
+                    })}>
+                        Signup
+                    </h1>
+
                     {/* KitabCloud Logo */}
                     <div style={{
                         width: '100%',
@@ -288,81 +326,81 @@ const Signup = () => {
                             maxWidth: 400,
                             marginBottom: 20
                         }}>
-                            <PrimaryTextInput 
-                                placeholder='Full Name' 
-                                value={formData.full_name} 
+                            <PrimaryTextInput
+                                placeholder='Full Name'
+                                value={formData.full_name}
                                 onChangeText={(value) => handleInputChange('full_name', value)}
                             />
                         </div>
-                        
+
                         <div style={{
                             width: '100%',
                             maxWidth: 400,
                             marginBottom: 20
                         }}>
-                            <PrimaryTextInput 
-                                placeholder='Email' 
-                                value={formData.email} 
+                            <PrimaryTextInput
+                                placeholder='Email'
+                                value={formData.email}
                                 onChangeText={(value) => handleInputChange('email', value)}
                             />
                         </div>
-                        
+
                         <div style={{
                             width: '100%',
                             maxWidth: 400,
                             marginBottom: 20
                         }}>
-                            <PrimaryTextInput 
-                                placeholder='Phone Number (Optional)' 
-                                value={formData.phone} 
+                            <PrimaryTextInput
+                                placeholder='Phone Number (Optional)'
+                                value={formData.phone}
                                 onChangeText={(value) => handleInputChange('phone', value)}
                             />
                         </div>
-                        
+
                         <div style={{
                             width: '100%',
                             maxWidth: 400,
                             marginBottom: 20
                         }}>
-                            <PrimaryTextInput 
-                                placeholder='Password' 
-                                value={formData.password} 
+                            <PrimaryTextInput
+                                placeholder='Password'
+                                value={formData.password}
                                 onChangeText={(value) => handleInputChange('password', value)}
                                 secureEntry={true}
                             />
                         </div>
-                        
+
                         <div style={{
                             width: '100%',
                             maxWidth: 400,
                             marginBottom: 20
                         }}>
-                            <PrimaryTextInput 
-                                placeholder='Confirm Password' 
-                                value={formData.confirm_password} 
+                            <PrimaryTextInput
+                                placeholder='Confirm Password'
+                                value={formData.confirm_password}
                                 onChangeText={(value) => handleInputChange('confirm_password', value)}
                                 secureEntry={true}
                             />
                         </div>
-                        
+
                         <div style={{
                             width: '100%',
                             maxWidth: 400,
                             marginBottom: 20
                         }}>
-                            <CommonButton 
-                                isLoading={isLoading} 
-                                buttonTitle='Sign Up' 
-                                onPress={onSignupPress} 
-                                customStyles={{ 
-                                    width: '100%', 
-                                }} 
+                            <CommonButton
+                                isLoading={isLoading}
+                                buttonTitle='Sign Up'
+                                onPress={onSignupPress}
+                                customStyles={{
+                                    width: '100%',
+                                }}
                             />
                         </div>
-                        
-                        <p style={commonStyles.textLightNormal(16, { 
-                            color: colors.black, 
-                            textAlign: 'center' 
+
+                        <p style={commonStyles.textLightNormal(16, {
+                            color: colors.black,
+                            textAlign: 'center'
                         })}>
                             Already have an account?
                             <button
@@ -383,13 +421,13 @@ const Signup = () => {
                     </div>
                 </div>
             </div>
-            
-            <ErrorToast 
-                message={errorMessage} 
-                isVisible={showError} 
-                onClose={() => setShowError(false)} 
+
+            <ErrorToast
+                message={errorMessage}
+                isVisible={showError}
+                onClose={() => setShowError(false)}
             />
-        </div>
+        </div >
     );
 };
 
