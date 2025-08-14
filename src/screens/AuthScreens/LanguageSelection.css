@@ -1,0 +1,125 @@
+.language-selection-container {
+    min-height: 100vh;
+    background-color: #ffffff;
+    padding: 20px;
+    position: relative;
+}
+
+.header-section {
+    margin-bottom: 20px;
+}
+
+.back-button {
+    background: none;
+    border: none;
+    font-size: 16px;
+    color: #000000;
+    cursor: pointer;
+    padding: 10px 0;
+    font-family: 'Poppins-Regular', sans-serif;
+}
+
+.back-button:hover {
+    color: #e7440d;
+}
+
+.title {
+    font-size: 34px;
+    margin-bottom: 20px;
+    text-align: center;
+    color: #000000;
+    font-family: 'Poppins-Bold', sans-serif;
+    font-weight: bold;
+}
+
+.subtitle {
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 30px;
+    color: #000000;
+    font-family: 'Poppins-Regular', sans-serif;
+    line-height: 1.5;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 50px;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #e7440d;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.languages-list {
+    max-width: 600px;
+    margin: 0 auto 100px auto;
+}
+
+.language-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    margin-bottom: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.language-text {
+    font-size: 18px;
+    color: #000000;
+    font-family: 'Poppins-Regular', sans-serif;
+}
+
+.language-checkbox {
+    width: 20px;
+    height: 20px;
+    accent-color: #e7440d;
+    cursor: pointer;
+}
+
+.button-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 600px;
+    display: flex;
+    justify-content: center;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .title {
+        font-size: 28px;
+    }
+    
+    .language-row {
+        padding: 12px 15px;
+    }
+    
+    .language-text {
+        font-size: 16px;
+    }
+    
+    .button-container {
+        width: 95%;
+    }
+}

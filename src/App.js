@@ -5,6 +5,9 @@ import { AudioPlayerProvider } from './context/AudioPlayerContext';
 import Login from './screens/AuthScreens/Login';
 import Signup from './screens/AuthScreens/Signup';
 import ForgotPassword from './screens/AuthScreens/ForgotPassword';
+import LanguageSelection from './screens/AuthScreens/LanguageSelection';
+import CategorySelection from './screens/AuthScreens/CategorySelection';
+import WelcomePage from './screens/AuthScreens/WelcomePage';
 import HomeScreen from './screens/MainScreens/HomeScreen/HomeScreen';
 import SearchScreen from './screens/MainScreens/SearchScreen/SearchScreen';
 import ProfileScreen from './screens/MainScreens/ProfileScreen/ProfileScreen';
@@ -64,6 +67,21 @@ const AppContent = () => {
                     <PublicRoute>
                         <ForgotPassword />
                     </PublicRoute>
+                } />
+                <Route path="/language-selection" element={
+                    <ProtectedRoute>
+                        <LanguageSelection />
+                    </ProtectedRoute>
+                } />
+                <Route path="/category-selection" element={
+                    <ProtectedRoute>
+                        <CategorySelection />
+                    </ProtectedRoute>
+                } />
+                <Route path="/welcome" element={
+                    <ProtectedRoute>
+                        <WelcomePage />
+                    </ProtectedRoute>
                 } />
                 <Route path="/home" element={
                     <ProtectedRoute>

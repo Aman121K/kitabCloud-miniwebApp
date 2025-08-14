@@ -1,4 +1,4 @@
 export const fonts = {
-    fontHeading: 'Inter',
-    fontContent: 'Inter',
+    fontHeading: 'Poppins',
+    fontContent: 'Poppins',
 }; 

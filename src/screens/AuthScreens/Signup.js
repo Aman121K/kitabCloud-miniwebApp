@@ -253,7 +253,7 @@ const Signup = () => {
                 if (loginResponse.data && loginResponse.data.success) {
                     const token = loginResponse.data.token;
                     login(loginResponse.data.user, token);
-                    navigate('/home');
+                    navigate('/language-selection');
                 }
             } else {
                 setErrorMessage(response.data?.message || 'Signup failed');

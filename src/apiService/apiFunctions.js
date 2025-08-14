@@ -553,5 +553,38 @@ export const apiFunctions = {
         catch (error) {
             console.log('Called', error)
         }
+    },
+    getUsersSavedLanguages: async (token) => {
+        try {
+            const res = await axios.get(BASE_URL + 'user_languages', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            return res.data.data;
+        } catch (error) {
+            console.log('Error getting user languages:', error);
+            return [];
+        }
+    },
+    AddUserlangauge: async (body, token) => {
+        try {
+            const res = await axios.post(BASE_URL + 'save/language', body, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            return res.data;
+        } catch (error) {
+            console.log('Error adding user language:', error);
+            return null;
+        }
+    },
+    AddUserCategory: async (body, token) => {
+        try {
+            const res = await axios.post(BASE_URL + 'update/category', body, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            return res.data;
+        } catch (error) {
+            console.log('Error adding user category:', error);
+            return null;
+        }
     }
 } 
