@@ -80,6 +80,7 @@ const BookDetails = () => {
 
     const handlePlayFullBook = () => {
         if (book?.bookaudio) {
+            // extention test
             // if (fullAudio && !fullAudio.paused) {
             //     fullAudio.pause();
             //     setIsPlayingFull(false);
