@@ -67,7 +67,7 @@ const PrimaryTextInput = ({
 const CommonButton = ({ 
     buttonTitle, 
     onPress, 
-    isLoading = false, 
+    isLoading = false,
     customStyles = {}, 
     customTextStyles = {},
     disabled = false
@@ -170,8 +170,14 @@ const Login = () => {
     const navigate = useNavigate();
     const { login } = useAuth();
 
+    const validatePassword = (password) => {
+        // Password must be at least 8 characters with at least one uppercase, one lowercase, one number, and one special character
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        return passwordRegex.test(password);
+    };
+
     const onLoginPress = async () => {
-        if (!email) {
+        if (!email.trim()) {
             setErrorMessage('Please enter a valid email address to continue');
             setShowError(true);
             return;
@@ -183,10 +189,17 @@ const Login = () => {
             return;
         }
 
+        // Validate password strength
+        if (!validatePassword(password)) {
+            setErrorMessage('Password must be at least 8 characters with uppercase, lowercase, number, and special character');
+            setShowError(true);
+            return;
+        }
+
         try {
             setIsLoading(true);
             const loginData = {
-                email: email,
+                email: email.trim(),
                 password: password,
                 device_token: 'web',
                 device_type: 'web',
@@ -216,14 +229,12 @@ const Login = () => {
         } catch (err) {
             setIsLoading(false);
             console.error('Login error:', err);
-            
-            // Handle different types of errors
-            if (err.response && err.response.data) {
-                setErrorMessage(err.response.data.message || 'Login failed');
+            if (err.response && err.response.data && err.response.data.message) {
+                setErrorMessage(err.response.data.message);
             } else if (err.message) {
                 setErrorMessage(err.message);
             } else {
-                setErrorMessage('Something went wrong. Please try again.');
+                setErrorMessage('Login failed. Please try again.');
             }
             setShowError(true);
         }
@@ -240,14 +251,41 @@ const Login = () => {
     return (
         <div style={commonStyles.fullScreenContainer}>
             <div style={commonStyles.fullScreenInnerContainer}>
-                <div style={{ 
-                    display: 'flex', 
-                    flexDirection: 'column', 
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
                     minHeight: '100vh',
                     paddingTop: 40
                 }}>
-                    {/* KitabCloud Logo */}
+                    <div style={{
+                        width: 200,
+                        height: 150,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        marginBottom: 20
+                    }}>
+                        <img
+                            src="https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg"
+                            alt="KitabCloud Logo"
+                            style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'contain',
+                                borderRadius: 12
+                            }}
+                        />
+                    </div>
+
+                    <h1 style={commonStyles.textLightBold(32, {
+                        color: colors.black,
+                        marginBottom: 10,
+                        textAlign: 'center'
+                    })}>
+                        Login
+                    </h1>
+
                     <div style={{
                         width: '100%',
                         maxWidth: 380,
@@ -261,43 +299,10 @@ const Login = () => {
                         alignItems: 'center',
                     }}>
                         <div style={{
-                            width: 200,
-                            height: 150,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
+                            width: '100%',
+                            maxWidth: 400,
                             marginBottom: 20
                         }}>
-                            <img 
-                                src="https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg"
-                                alt="KitabCloud Logo"
-                                style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'contain',
-                                    borderRadius: 12
-                                }}
-                            />
-                        </div>
-                        
-                        <h1 style={commonStyles.textLightBold(32, { 
-                            color: colors.black, 
-                            marginBottom: 10, 
-                            textAlign: 'center' 
-                        })}>
-                            Login
-                        </h1>
-                        
-                        <p style={commonStyles.textLightNormal(18, { 
-                            color: colors.grey, 
-                            marginBottom: 30, 
-                            textAlign: 'center',
-                            maxWidth: 400
-                        })}>
-                            Enter your email and password to login to your account
-                        </p>
-
-                        <div style={{ width: '100%', maxWidth: 400 }}>
                             <PrimaryTextInput 
                                 placeholder='Email' 
                                 value={email} 
@@ -326,7 +331,7 @@ const Login = () => {
                                 Forgot Password?
                             </button>
                             
-                            <CommonButton 
+                            <CommonButton
                                 isLoading={isLoading} 
                                 buttonTitle='Login' 
                                 onPress={onLoginPress} 

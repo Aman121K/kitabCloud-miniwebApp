@@ -570,6 +570,7 @@ export const apiFunctions = {
             const res = await axios.post(BASE_URL + 'save/language', body, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
+            console.log('Response is>>save language', res)
             return res.data;
         } catch (error) {
             console.log('Error adding user language:', error);

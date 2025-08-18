@@ -203,11 +203,15 @@ const Signup = () => {
             setShowError(true);
             return false;
         }
-        if (formData.password.length < 6) {
-            setErrorMessage('Password must be at least 6 characters');
+        
+        // Enhanced password validation
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        if (!passwordRegex.test(formData.password)) {
+            setErrorMessage('Password must be at least 8 characters with uppercase, lowercase, number, and special character');
             setShowError(true);
             return false;
         }
+        
         return true;
     };
 

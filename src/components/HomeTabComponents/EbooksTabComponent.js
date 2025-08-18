@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { apiFunctions } from '../../apiService/apiFunctions';
 import BookCard from '../BookCard';
@@ -7,6 +8,7 @@ const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 
 const EbooksTabComponent = () => {
     const { token } = useAuth();
+    const navigate = useNavigate();
     const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -22,6 +24,7 @@ const EbooksTabComponent = () => {
             const data = await apiFunctions.getEbooks(token);
             setCategories(data || []);
         } catch (error) {
+            console.error('Error fetching ebooks:', error);
             setCategories([]);
         } finally {
             setLoading(false);
@@ -51,21 +54,34 @@ const EbooksTabComponent = () => {
                         </div>
                         <button
                             style={{ background: 'none', border: 'none', color: '#e7440d', fontWeight: 500, fontSize: 15, cursor: 'pointer' }}
-                            onClick={() => alert(`View all for ${cat.category_name}`)}
+                            onClick={() => navigate('/search', { state: { searchType: 'ebooks', category: cat.category_name } })}
                         >
                             View All
                         </button>
                     </div>
                     <div style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 8 }}>
-                        {(cat.books || []).slice(0, 4).map((book) => (
-                            <div key={book.id} style={{ minWidth: 160, maxWidth: 180 }}>
-                                <BookCard book={{
-                                    ...book,
-                                    coverimage: book.coverimage ? `${FILE_BASE_URL}${book.coverimage}` : book.coverimage,
-                                    bookfile: book.bookfile ? `${FILE_BASE_URL}${book.bookfile}` : book.bookfile
-                                }} />
-                            </div>
-                        ))}
+                        {(cat.books || []).slice(0, 4).map((book) => {
+                            // Ensure book has required properties
+                            const safeBook = {
+                                id: book.id,
+                                title: book.title || 'Untitled',
+                                author: book.author || { name: 'Unknown Author' },
+                                author_name: book.author_name || 'Unknown Author',
+                                coverimage: book.coverimage ? `${FILE_BASE_URL}${book.coverimage}` : book.coverimage,
+                                image: book.image,
+                                rating: book.rating || 0,
+                                is_liked: book.is_liked || false,
+                                audio_url: book.audio_url,
+                                bookaudio: book.bookaudio,
+                                bookfile: book.bookfile ? `${FILE_BASE_URL}${book.bookfile}` : book.bookfile
+                            };
+                            
+                            return (
+                                <div key={book.id} style={{ minWidth: 160, maxWidth: 180 }}>
+                                    <BookCard book={safeBook} />
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             ))}

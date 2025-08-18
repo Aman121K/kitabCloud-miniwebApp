@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAudioPlayer } from '../context/AudioPlayerContext';
@@ -12,14 +12,31 @@ const BookCard = ({ book }) => {
     const { playTrack, currentTrack, isPlaying } = useAudioPlayer();
     const navigate = useNavigate();
     const [isLiked, setIsLiked] = useState(book.is_liked || false);
+    const [isLikeLoading, setIsLikeLoading] = useState(false);
+
+    // Update like state when book prop changes
+    useEffect(() => {
+        setIsLiked(book.is_liked || false);
+    }, [book.is_liked]);
 
     const handleLike = async (e) => {
         e.stopPropagation();
+        if (isLikeLoading) return; // Prevent multiple clicks
+        
         try {
-            await apiFunctions.likeUnlineBook(book.id, token);
-            setIsLiked(!isLiked);
+            setIsLikeLoading(true);
+            const response = await apiFunctions.likeUnlineBook(book.id, token);
+            
+            if (response && response.success !== false) {
+                setIsLiked(!isLiked);
+            } else {
+                console.error('Like/unlike failed:', response);
+            }
         } catch (error) {
             console.error('Error liking book:', error);
+            // Don't change state on error
+        } finally {
+            setIsLikeLoading(false);
         }
     };
 
@@ -35,6 +52,25 @@ const BookCard = ({ book }) => {
     };
 
     const isCurrentTrack = currentTrack?.id === book.id;
+
+    // Helper function to safely get string values
+    const getSafeString = (value) => {
+        if (typeof value === 'string') return value;
+        if (typeof value === 'object' && value !== null) {
+            // If it's an object, try to get a meaningful string representation
+            if (value.name) return value.name;
+            if (value.title) return value.title;
+            if (value.id) return `ID: ${value.id}`;
+            return 'Unknown';
+        }
+        return value?.toString() || 'Unknown';
+    };
+
+    // Safely get book properties
+    const bookTitle = getSafeString(book.title);
+    const bookAuthor = getSafeString(book.author?.name || book.author_name || book.author);
+    const bookImage = book.coverimage || book.image || '/dummy-book.png';
+    const bookRating = typeof book.rating === 'number' ? book.rating : 0;
 
     return (
         <div 
@@ -59,8 +95,8 @@ const BookCard = ({ book }) => {
         >
             <div style={{ position: 'relative' }}>
                 <img 
-                    src={book.coverimage || book.image || '/dummy-book.png'} 
-                    alt={book.title}
+                    src={bookImage} 
+                    alt={bookTitle}
                     style={{
                         width: '100%',
                         height: 200,
@@ -68,17 +104,21 @@ const BookCard = ({ book }) => {
                         borderRadius: 8,
                         marginBottom: 10
                     }}
+                    onError={(e) => {
+                        e.target.src = '/favicon.ico';
+                    }}
                 />
                 
                 <button
                     onClick={handleLike}
+                    disabled={isLikeLoading}
                     style={{
                         position: 'absolute',
                         top: 10,
                         right: 10,
                         background: 'none',
                         border: 'none',
-                        cursor: 'pointer',
+                        cursor: isLikeLoading ? 'not-allowed' : 'pointer',
                         padding: 5,
                         backgroundColor: 'rgba(255,255,255,0.9)',
                         borderRadius: '50%',
@@ -86,15 +126,27 @@ const BookCard = ({ book }) => {
                         height: 30,
                         display: 'flex',
                         alignItems: 'center',
-                        justifyContent: 'center'
+                        justifyContent: 'center',
+                        opacity: isLikeLoading ? 0.6 : 1
                     }}
                 >
-                    <span style={{ 
-                        fontSize: 16,
-                        color: isLiked ? colors.appPrimary : colors.grey
-                    }}>
-                        {isLiked ? '❤️' : '🤍'}
-                    </span>
+                    {isLikeLoading ? (
+                        <div style={{
+                            width: 16,
+                            height: 16,
+                            border: '2px solid #e7440d',
+                            borderTop: '2px solid transparent',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite'
+                        }}></div>
+                    ) : (
+                        <span style={{ 
+                            fontSize: 16,
+                            color: isLiked ? colors.appPrimary : colors.grey
+                        }}>
+                            {isLiked ? '❤️' : '🤍'}
+                        </span>
+                    )}
                 </button>
                 
                 {book.audio_url && (
@@ -102,55 +154,52 @@ const BookCard = ({ book }) => {
                         onClick={handlePlay}
                         style={{
                             position: 'absolute',
-                            bottom: 10,
+                            bottom: 20,
                             right: 10,
-                            background: isCurrentTrack && isPlaying ? colors.green : colors.appPrimary,
+                            background: colors.appPrimary,
                             border: 'none',
                             borderRadius: '50%',
                             width: 40,
                             height: 40,
-                            cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
-                            justifyContent: 'center'
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                            color: colors.white
                         }}
                     >
-                        <span style={{ 
-                            fontSize: 16,
-                            color: colors.white
-                        }}>
-                            {isCurrentTrack && isPlaying ? '⏸️' : '▶️'}
-                        </span>
+                        {isCurrentTrack && isPlaying ? '⏸️' : '▶️'}
                     </button>
                 )}
             </div>
             
-            <h3 style={commonStyles.textLightBold(16, { 
-                marginBottom: 5,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-            })}>
-                {book.title}
-            </h3>
-            
-            <p style={commonStyles.textLightNormal(14, { 
-                color: colors.grey,
-                marginBottom: 5,
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-                whiteSpace: 'nowrap'
-            })}>
-                {book.author?.name || book.author_name || 'Unknown Author'}
-            </p>
-            
-            {book.rating && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <span style={{ color: colors.appPrimary, fontWeight: '600' }}>
-                        ★ {book.rating}
+            <div>
+                <h3 style={{
+                    ...commonStyles.textLightBold(16),
+                    marginBottom: 4,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                }}>
+                    {bookTitle}
+                </h3>
+                <p style={{
+                    ...commonStyles.textLightNormal(14),
+                    color: colors.grey,
+                    marginBottom: 8,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                }}>
+                    {bookAuthor}
+                </p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <span style={{ color: colors.appPrimary }}>★</span>
+                    <span style={{ fontSize: 14, color: colors.grey }}>
+                        {bookRating}
                     </span>
                 </div>
-            )}
+            </div>
         </div>
     );
 };
