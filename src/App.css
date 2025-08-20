@@ -101,6 +101,72 @@ body {
   }
 }
 
+/* Mobile-specific improvements */
+@media (max-width: 375px) {
+  .main-content {
+    padding: 8px;
+  }
+  
+  .tab-content {
+    padding: 12px;
+  }
+  
+  .tab-button {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .tab-button {
+    min-height: 44px;
+  }
+  
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Hide scrollbars for webkit browsers */
+.horizontal-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbars for Firefox */
+.horizontal-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Mobile-specific improvements */
+@media (max-width: 480px) {
+  .main-content {
+    padding: 12px;
+  }
+  
+  .tab-content {
+    padding: 16px;
+  }
+  
+  .tab-button {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+  
+  /* Improve touch targets */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better spacing for mobile */
+  .mobile-spacing {
+    padding: 12px;
+  }
+}
+
 /* Loading Spinner */
 .spinner {
   display: inline-block;

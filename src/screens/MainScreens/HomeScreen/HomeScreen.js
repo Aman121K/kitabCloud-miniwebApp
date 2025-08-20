@@ -46,7 +46,13 @@ const HomeScreen = () => {
   }, [userData]);
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#fff' }}>
+    <div style={{ 
+      minHeight: '100vh', 
+      display: 'flex', 
+      flexDirection: 'column', 
+      background: '#fff',
+      paddingBottom: '80px' // Account for bottom navigation
+    }}>
       <div style={{ flex: 1 }}>
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
@@ -55,12 +61,29 @@ const HomeScreen = () => {
         ) : (
           <>
             {userData && userData.full_name && (
-              <div style={{ padding: '30px 15px 0 15px' }}>
-                <h2 style={{ margin: 0 }}>{getGreeting()}</h2>
+              <div style={{ 
+                padding: '20px 15px 10px 15px',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                color: 'white'
+              }}>
+                <h2 style={{ 
+                  margin: 0, 
+                  fontSize: '24px',
+                  fontWeight: '600',
+                  textShadow: '0 1px 2px rgba(0,0,0,0.1)'
+                }}>
+                  {getGreeting()}
+                </h2>
               </div>
             )}
             <FilterBar filterData={FilterData} selectedFilterTab={selectedFilterTab} setSelectedFilterTab={setSelectedFilterTab} />
-            <div style={{ flex: 1, paddingTop: 15 }}>
+            <div style={{ 
+              flex: 1, 
+              paddingTop: 15,
+              paddingBottom: 20,
+              overflowY: 'auto',
+              WebkitOverflowScrolling: 'touch'
+            }}>
               {selectedFilterTab === 'All' && <AllTabComponent />}
               {selectedFilterTab === 'Audiobooks' && <AudioBooksTabComponent />}
               {selectedFilterTab === 'Ebooks' && <EbooksTabComponent />}

@@ -5,6 +5,13 @@
   overflow-x: auto;
   background: #fff;
   border-bottom: 1px solid #eee;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filter-bar::-webkit-scrollbar {
+  display: none;
 }
 
 .filter-tab {
@@ -16,6 +23,12 @@
   color: #333;
   cursor: pointer;
   transition: background 0.2s, color 0.2s;
+  white-space: nowrap;
+  min-width: fit-content;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .filter-tab.selected {
@@ -26,4 +39,39 @@
 
 .filter-tab:focus {
   outline: none;
+}
+
+/* Mobile responsive improvements */
+@media (max-width: 480px) {
+  .filter-bar {
+    padding: 8px 12px;
+    gap: 8px;
+  }
+  
+  .filter-tab {
+    padding: 6px 14px;
+    font-size: 14px;
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 375px) {
+  .filter-bar {
+    padding: 6px 10px;
+    gap: 6px;
+  }
+  
+  .filter-tab {
+    padding: 5px 12px;
+    font-size: 13px;
+    min-height: 36px;
+  }
+}
+
+/* Touch-friendly improvements */
+@media (hover: none) and (pointer: coarse) {
+  .filter-tab {
+    min-height: 44px;
+    padding: 10px 16px;
+  }
 } 

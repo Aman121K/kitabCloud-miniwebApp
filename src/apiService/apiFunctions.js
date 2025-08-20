@@ -159,10 +159,12 @@ export const apiFunctions = {
                     'Authorization': `Bearer ${token}`
                 }
             })
-            return res.data.data
+            console.log('Search response:', res.data);
+            return res.data.data || res.data || { books: [], authors: [], podcasts: [] };
         }
         catch (error) {
-            console.log('Error is', error)
+            console.log('Search error:', error);
+            return { books: [], authors: [], podcasts: [] };
         }
     },
     likeUnlineBook: async (id, token) => {

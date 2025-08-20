@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { apiFunctions } from '../../apiService/apiFunctions';
 import { colors } from '../../constants/colors';
@@ -7,6 +8,7 @@ import EmptyState from '../EmptyState';
 
 const PodcastsTabComponent = () => {
     const { token } = useAuth();
+    const navigate = useNavigate();
     const [podcasts, setPodcasts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -70,13 +72,46 @@ const PodcastsTabComponent = () => {
     }
 
     return (
-        <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-            gap: 20,
-            padding: '20px 0'
-        }}>
-            {validPodcasts.map((podcast, index) => {
+        <div style={{ padding: '0 16px' }}>
+            {/* Header with View All button */}
+            <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: 20,
+                padding: '0 4px'
+            }}>
+                <h2 style={{
+                    fontSize: 20,
+                    fontWeight: 600,
+                    color: colors.darkGrey,
+                    margin: 0
+                }}>
+                    All Podcasts
+                </h2>
+                <button
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: colors.primary,
+                        fontWeight: 500,
+                        fontSize: 15,
+                        cursor: 'pointer'
+                    }}
+                    onClick={() => navigate('/all-podcasts')}
+                >
+                    View All
+                </button>
+            </div>
+            
+            {/* Podcasts Grid */}
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gap: 20,
+                padding: '20px 0'
+            }}>
+                {validPodcasts.map((podcast, index) => {
                 // Ensure podcast has required properties
                 const safePodcast = {
                     id: podcast.id,
@@ -93,6 +128,7 @@ const PodcastsTabComponent = () => {
                 
                 return <BookCard key={podcast.id || index} book={safePodcast} />;
             })}
+            </div>
         </div>
     );
 };

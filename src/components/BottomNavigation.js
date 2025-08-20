@@ -22,7 +22,8 @@ const BottomNavigation = () => {
             backgroundColor: colors.white,
             borderTop: `1px solid ${colors.lightGrey}`,
             padding: '10px 0',
-            zIndex: 1000
+            zIndex: 1000,
+            boxShadow: '0 -2px 10px rgba(0,0,0,0.1)'
         }}>
             <div style={{
                 display: 'flex',
@@ -43,7 +44,10 @@ const BottomNavigation = () => {
                             padding: '8px 16px',
                             borderRadius: 8,
                             transition: 'background-color 0.2s ease',
-                            backgroundColor: location.pathname === item.path ? colors.lightestGrey : 'transparent'
+                            backgroundColor: location.pathname === item.path ? colors.lightestGrey : 'transparent',
+                            minHeight: '44px',
+                            minWidth: '44px',
+                            justifyContent: 'center'
                         }}
                         onMouseEnter={(e) => {
                             if (location.pathname !== item.path) {

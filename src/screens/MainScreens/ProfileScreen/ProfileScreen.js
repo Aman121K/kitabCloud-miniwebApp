@@ -70,8 +70,14 @@ const ProfileScreen = () => {
     }
 
     return (
-        <div style={commonStyles.fullScreenContainer}>
-            <div style={commonStyles.fullScreenInnerContainer}>
+        <div style={{
+            ...commonStyles.fullScreenContainer,
+            paddingBottom: '80px' // Account for bottom navigation
+        }}>
+            <div style={{
+                ...commonStyles.fullScreenInnerContainer,
+                paddingBottom: '20px'
+            }}>
                 {/* Tab Navigation */}
                 <div style={{
                     display: 'flex',

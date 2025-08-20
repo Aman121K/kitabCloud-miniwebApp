@@ -54,7 +54,7 @@ const AudioBooksTabComponent = () => {
                         </div>
                         <button
                             style={{ background: 'none', border: 'none', color: '#e7440d', fontWeight: 500, fontSize: 15, cursor: 'pointer' }}
-                            onClick={() => navigate('/search', { state: { searchType: 'audiobooks', category: cat.category_name } })}
+                            onClick={() => navigate('/all-audiobooks')}
                         >
                             View All
                         </button>

@@ -54,7 +54,7 @@ const EbooksTabComponent = () => {
                         </div>
                         <button
                             style={{ background: 'none', border: 'none', color: '#e7440d', fontWeight: 500, fontSize: 15, cursor: 'pointer' }}
-                            onClick={() => navigate('/search', { state: { searchType: 'ebooks', category: cat.category_name } })}
+                            onClick={() => navigate('/all-ebooks')}
                         >
                             View All
                         </button>

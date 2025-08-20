@@ -92,12 +92,12 @@ const AllTabComponent = () => {
         <div style={{ margin: '28px 0 0 0' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
             <div style={{ fontWeight: 600, fontSize: 18 }}>New Books</div>
-            <button
-              style={{ background: 'none', border: 'none', color: '#e7440d', fontWeight: 500, fontSize: 15, cursor: 'pointer' }}
-              onClick={() => navigate('/search', { state: { searchType: 'books' } })}
-            >
-              See All
-            </button>
+                      <button
+            style={{ background: 'none', border: 'none', color: '#e7440d', fontWeight: 500, fontSize: 15, cursor: 'pointer' }}
+            onClick={() => navigate('/all-books')}
+          >
+            See All
+          </button>
           </div>
           <div style={{ textAlign: 'center', padding: 20, color: '#888' }}>
             No books available
@@ -112,12 +112,20 @@ const AllTabComponent = () => {
           <div style={{ fontWeight: 600, fontSize: 18 }}>New Books</div>
           <button
             style={{ background: 'none', border: 'none', color: '#e7440d', fontWeight: 500, fontSize: 15, cursor: 'pointer' }}
-            onClick={() => navigate('/search', { state: { searchType: 'books' } })}
+            onClick={() => navigate('/all-books')}
           >
             See All
           </button>
         </div>
-        <div style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 8 }}>
+        <div style={{ 
+          display: 'flex', 
+          gap: 16, 
+          overflowX: 'auto', 
+          paddingBottom: 8,
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}>
           {validBooks.slice(0, 3).map((book) => {
             // Ensure book has required properties
             const safeBook = {
@@ -153,7 +161,15 @@ const AllTabComponent = () => {
     return (
       <div style={{ margin: '32px 0 0 0' }}>
         <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 10 }}>Readers</div>
-        <div style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 8 }}>
+        <div style={{ 
+          display: 'flex', 
+          gap: 16, 
+          overflowX: 'auto', 
+          paddingBottom: 8,
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}>
           {readers.slice(0, 4).map((reader) => (
             <div key={reader.id} style={{ minWidth: 120, textAlign: 'center' }}>
               <img
@@ -195,7 +211,12 @@ const AllTabComponent = () => {
   };
 
   return (
-    <div style={{ padding: '0 16px 80px 16px', maxWidth: 420, margin: '0 auto' }}>
+    <div style={{ 
+      padding: '0 16px 20px 16px', 
+      maxWidth: 420, 
+      margin: '0 auto',
+      WebkitOverflowScrolling: 'touch'
+    }}>
       <AdsSection />
       <NewBooksSection />
       <ComingSoonSection />

@@ -18,6 +18,7 @@ const SearchScreen = () => {
     const [categories, setCategories] = useState([]);
     const [categoriesLoading, setCategoriesLoading] = useState(false);
     const [searchType, setSearchType] = useState(location.state?.searchType || 'all');
+    const [searchTimeout, setSearchTimeout] = useState(null);
 
     useEffect(() => {
         if (!searchQuery.trim()) {
@@ -43,7 +44,16 @@ const SearchScreen = () => {
 
         try {
             setLoading(true);
-            const data = await apiFunctions.searchItems({ query: searchQuery }, token);
+            const searchParams = { query: searchQuery };
+            
+            // Add search type if specified
+            if (searchType && searchType !== 'all') {
+                searchParams.type = searchType;
+            }
+            
+            console.log('Searching with params:', searchParams);
+            const data = await apiFunctions.searchItems(searchParams, token);
+            console.log('Search results:', data);
             setSearchResults(data || {});
         } catch (error) {
             console.error('Error searching:', error);
@@ -66,20 +76,76 @@ const SearchScreen = () => {
         setTimeout(() => handleSearch(), 100);
     };
 
+    const handleSearchInputChange = (e) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+        
+        // Clear previous timeout
+        if (searchTimeout) {
+            clearTimeout(searchTimeout);
+        }
+        
+        // Auto-search after 500ms of no typing
+        if (value.trim()) {
+            const timeout = setTimeout(() => {
+                handleSearch();
+            }, 500);
+            setSearchTimeout(timeout);
+        } else {
+            setSearchResults({});
+        }
+    };
+
     return (
-        <div style={commonStyles.fullScreenContainer}>
-            <div style={commonStyles.fullScreenInnerContainer}>
+        <div style={{
+            ...commonStyles.fullScreenContainer,
+            paddingBottom: '80px' // Account for bottom navigation
+        }}>
+            <div style={{
+                ...commonStyles.fullScreenInnerContainer,
+                paddingBottom: '20px'
+            }}>
                 {/* Search Header */}
                 <div style={{ marginBottom: 20 }}>
                     <h1 style={commonStyles.textLightBold(24, { marginBottom: 10 })}>
                         {searchType === 'all' ? 'Search' : `Search ${searchType}`}
                     </h1>
+                    
+                    {/* Search Type Selector */}
+                    <div style={{ 
+                        display: 'flex', 
+                        gap: 8, 
+                        marginBottom: 12,
+                        overflowX: 'auto',
+                        WebkitOverflowScrolling: 'touch'
+                    }}>
+                        {['all', 'books', 'authors', 'podcasts'].map((type) => (
+                            <button
+                                key={type}
+                                onClick={() => setSearchType(type)}
+                                style={{
+                                    padding: '6px 12px',
+                                    background: searchType === type ? colors.appPrimary : colors.white,
+                                    color: searchType === type ? colors.white : colors.black,
+                                    border: `1px solid ${searchType === type ? colors.appPrimary : colors.lightGrey}`,
+                                    borderRadius: 16,
+                                    fontSize: 12,
+                                    cursor: 'pointer',
+                                    whiteSpace: 'nowrap',
+                                    minWidth: 'fit-content'
+                                }}
+                            >
+                                {type.charAt(0).toUpperCase() + type.slice(1)}
+                            </button>
+                        ))}
+                    </div>
+                    
                     <div style={{ position: 'relative' }}>
                         <input
                             type="text"
                             placeholder="Search for books, authors, podcasts..."
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={handleSearchInputChange}
                             onKeyPress={handleKeyPress}
                             style={{
                                 width: '100%',
@@ -92,20 +158,23 @@ const SearchScreen = () => {
                         />
                         <button
                             onClick={handleSearch}
+                            disabled={loading}
                             style={{
                                 position: 'absolute',
                                 right: 8,
                                 top: '50%',
                                 transform: 'translateY(-50%)',
-                                background: colors.appPrimary,
+                                background: loading ? colors.grey : colors.appPrimary,
                                 color: colors.white,
                                 border: 'none',
                                 borderRadius: 6,
                                 padding: '8px 16px',
-                                cursor: 'pointer'
+                                cursor: loading ? 'not-allowed' : 'pointer',
+                                minHeight: '36px',
+                                minWidth: '60px'
                             }}
                         >
-                            Search
+                            {loading ? '...' : 'Search'}
                         </button>
                     </div>
                 </div>
@@ -164,8 +233,8 @@ const SearchScreen = () => {
                                 {/* Books Section */}
                                 {searchResults.books && searchResults.books.length > 0 ? (
                                     <div style={{ marginBottom: 32 }}>
-                                        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 10 }}>Books</div>
-                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 20 }}>
+                                        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 10 }}>Books ({searchResults.books.length})</div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16 }}>
                                             {searchResults.books.filter(book => book && book.id).map((item, idx) => {
                                                 // Ensure book has required properties
                                                 const safeBook = {
@@ -185,36 +254,65 @@ const SearchScreen = () => {
                                             })}
                                         </div>
                                     </div>
-                                ) : searchQuery.trim() && (
+                                ) : searchQuery.trim() && searchType !== 'authors' && searchType !== 'podcasts' && (
                                     <div style={{ height: 80, background: '#f5f5f5', borderRadius: 10, marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bbb', fontSize: 16 }}>No books found</div>
                                 )}
                                 
                                 {/* Authors Section */}
                                 {searchResults.authors && searchResults.authors.length > 0 ? (
                                     <div style={{ marginBottom: 32 }}>
-                                        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 10 }}>Authors</div>
-                                        <div style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 8 }}>
+                                        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 10 }}>Authors ({searchResults.authors.length})</div>
+                                        <div style={{ 
+                                            display: 'flex', 
+                                            gap: 16, 
+                                            overflowX: 'auto', 
+                                            paddingBottom: 8,
+                                            WebkitOverflowScrolling: 'touch'
+                                        }}>
                                             {searchResults.authors.map((item, idx) => (
                                                 <AuthorCard key={item.id || idx} author={item} />
                                             ))}
                                         </div>
                                     </div>
-                                ) : searchQuery.trim() && (
+                                ) : searchQuery.trim() && searchType !== 'books' && searchType !== 'podcasts' && (
                                     <div style={{ height: 80, background: '#f5f5f5', borderRadius: 10, marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bbb', fontSize: 16 }}>No authors found</div>
                                 )}
 
                                 {/* Podcasts Section */}
                                 {searchResults.podcasts && searchResults.podcasts.length > 0 ? (
                                     <div style={{ marginBottom: 32 }}>
-                                        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 10 }}>Podcasts</div>
-                                        <div style={{ display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 8 }}>
+                                        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 10 }}>Podcasts ({searchResults.podcasts.length})</div>
+                                        <div style={{ 
+                                            display: 'flex', 
+                                            gap: 16, 
+                                            overflowX: 'auto', 
+                                            paddingBottom: 8,
+                                            WebkitOverflowScrolling: 'touch'
+                                        }}>
                                             {searchResults.podcasts.map((item, idx) => (
                                                 <PodcastCard key={item.id || idx} podcast={item} />
                                             ))}
                                         </div>
                                     </div>
-                                ) : searchQuery.trim() && (
+                                ) : searchQuery.trim() && searchType !== 'books' && searchType !== 'authors' && (
                                     <div style={{ height: 80, background: '#f5f5f5', borderRadius: 10, marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bbb', fontSize: 16 }}>No podcasts found</div>
+                                )}
+
+                                {/* Debug Info (remove in production) */}
+                                {process.env.NODE_ENV === 'development' && searchQuery.trim() && (
+                                    <div style={{ 
+                                        background: '#f0f0f0', 
+                                        padding: 16, 
+                                        borderRadius: 8, 
+                                        marginTop: 20,
+                                        fontSize: 12,
+                                        fontFamily: 'monospace'
+                                    }}>
+                                        <div><strong>Debug Info:</strong></div>
+                                        <div>Query: "{searchQuery}"</div>
+                                        <div>Type: {searchType}</div>
+                                        <div>Results: {JSON.stringify(searchResults, null, 2)}</div>
+                                    </div>
                                 )}
 
                                 {/* No Results */}

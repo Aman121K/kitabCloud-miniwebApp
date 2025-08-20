@@ -82,15 +82,22 @@ const BookCard = ({ book }) => {
                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease',
                 cursor: 'pointer',
-                border: isCurrentTrack ? `2px solid ${colors.appPrimary}` : 'none'
+                border: isCurrentTrack ? `2px solid ${colors.appPrimary}` : 'none',
+                minHeight: '280px',
+                display: 'flex',
+                flexDirection: 'column'
             }}
             onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+                if (window.matchMedia('(hover: hover)').matches) {
+                    e.target.style.transform = 'translateY(-2px)';
+                    e.target.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)';
+                }
             }}
             onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                if (window.matchMedia('(hover: hover)').matches) {
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+                }
             }}
         >
             <div style={{ position: 'relative' }}>
@@ -102,7 +109,8 @@ const BookCard = ({ book }) => {
                         height: 200,
                         objectFit: 'cover',
                         borderRadius: 8,
-                        marginBottom: 10
+                        marginBottom: 10,
+                        aspectRatio: '3/4'
                     }}
                     onError={(e) => {
                         e.target.src = '/favicon.ico';
@@ -173,27 +181,31 @@ const BookCard = ({ book }) => {
                 )}
             </div>
             
-            <div>
-                <h3 style={{
-                    ...commonStyles.textLightBold(16),
-                    marginBottom: 4,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                }}>
-                    {bookTitle}
-                </h3>
-                <p style={{
-                    ...commonStyles.textLightNormal(14),
-                    color: colors.grey,
-                    marginBottom: 8,
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap'
-                }}>
-                    {bookAuthor}
-                </p>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                    <h3 style={{
+                        ...commonStyles.textLightBold(16),
+                        marginBottom: 4,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        lineHeight: '1.2'
+                    }}>
+                        {bookTitle}
+                    </h3>
+                    <p style={{
+                        ...commonStyles.textLightNormal(14),
+                        color: colors.grey,
+                        marginBottom: 8,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        lineHeight: '1.2'
+                    }}>
+                        {bookAuthor}
+                    </p>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginTop: 'auto' }}>
                     <span style={{ color: colors.appPrimary }}>★</span>
                     <span style={{ fontSize: 14, color: colors.grey }}>
                         {bookRating}

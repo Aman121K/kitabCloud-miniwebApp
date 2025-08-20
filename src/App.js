@@ -12,6 +12,12 @@ import HomeScreen from './screens/MainScreens/HomeScreen/HomeScreen';
 import SearchScreen from './screens/MainScreens/SearchScreen/SearchScreen';
 import ProfileScreen from './screens/MainScreens/ProfileScreen/ProfileScreen';
 import BookDetails from './screens/MainScreens/OtherScreens/BookDetails';
+import AllBooksPage from './screens/MainScreens/OtherScreens/AllBooksPage';
+import AllEbooksPage from './screens/MainScreens/OtherScreens/AllEbooksPage';
+import AllAudiobooksPage from './screens/MainScreens/OtherScreens/AllAudiobooksPage';
+import AllVideosPage from './screens/MainScreens/OtherScreens/AllVideosPage';
+import AllMagazinesPage from './screens/MainScreens/OtherScreens/AllMagazinesPage';
+import AllPodcastsPage from './screens/MainScreens/OtherScreens/AllPodcastsPage';
 import PlayerScreen from './screens/MainScreens/PlayerScreen/PlayerScreen';
 import AudioPlayer from './components/AudioPlayer/AudioPlayer';
 import './App.css';
@@ -101,6 +107,36 @@ const AppContent = () => {
                 <Route path="/book/:id" element={
                     <ProtectedRoute>
                         <BookDetails />
+                    </ProtectedRoute>
+                } />
+                <Route path="/all-books" element={
+                    <ProtectedRoute>
+                        <AllBooksPage />
+                    </ProtectedRoute>
+                } />
+                <Route path="/all-ebooks" element={
+                    <ProtectedRoute>
+                        <AllEbooksPage />
+                    </ProtectedRoute>
+                } />
+                <Route path="/all-audiobooks" element={
+                    <ProtectedRoute>
+                        <AllAudiobooksPage />
+                    </ProtectedRoute>
+                } />
+                <Route path="/all-videos" element={
+                    <ProtectedRoute>
+                        <AllVideosPage />
+                    </ProtectedRoute>
+                } />
+                <Route path="/all-magazines" element={
+                    <ProtectedRoute>
+                        <AllMagazinesPage />
+                    </ProtectedRoute>
+                } />
+                <Route path="/all-podcasts" element={
+                    <ProtectedRoute>
+                        <AllPodcastsPage />
                     </ProtectedRoute>
                 } />
                 <Route path="/player" element={
