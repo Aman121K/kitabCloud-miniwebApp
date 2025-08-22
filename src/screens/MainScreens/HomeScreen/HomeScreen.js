@@ -15,23 +15,39 @@ const FilterData = ['All', 'Audiobooks', 'Ebooks', 'Videos', 'Magazines', 'Podca
 const HomeScreen = () => {
   const { token } = useAuth();
   const [userData, setUserData] = useState(null);
+  const [homeData, setHomeData] = useState(null);
   const [selectedFilterTab, setSelectedFilterTab] = useState(FilterData[0]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (token) {
-      getUserData();
+      fetchData();
     }
     // eslint-disable-next-line
   }, [token]);
 
-  const getUserData = async () => {
+  const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await apiFunctions.getUserData(token);
-      setUserData(res);
+      // Fetch both user data and home data
+      const [userRes, homeRes] = await Promise.all([
+        apiFunctions.getUserData(token),
+        apiFunctions.getHomeData(token)
+      ]);
+      
+      setUserData(userRes);
+      setHomeData(homeRes);
+      console.log('Home data received:', homeRes);
+      console.log('Category with books:', homeRes?.categoryWithBooks?.length || 0);
+      console.log('Authors:', homeRes?.author?.length || 0);
+      console.log('Readers:', homeRes?.reader?.length || 0);
+      console.log('Ads:', homeRes?.ads?.length || 0);
+      console.log('Free books:', homeRes?.free_books?.length || 0);
+      console.log('Coming soon:', homeRes?.coming_soon?.length || 0);
     } catch (error) {
+      console.error('Error fetching data:', error);
       setUserData(null);
+      setHomeData(null);
     } finally {
       setLoading(false);
     }
@@ -84,12 +100,12 @@ const HomeScreen = () => {
               overflowY: 'auto',
               WebkitOverflowScrolling: 'touch'
             }}>
-              {selectedFilterTab === 'All' && <AllTabComponent />}
-              {selectedFilterTab === 'Audiobooks' && <AudioBooksTabComponent />}
-              {selectedFilterTab === 'Ebooks' && <EbooksTabComponent />}
-              {selectedFilterTab === 'Magazines' && <MagazinesTabComponent />}
-              {selectedFilterTab === 'Podcasts' && <PodcastsTabComponent />}
-              {selectedFilterTab === 'Videos' && <VideosTabComponent />}
+              {selectedFilterTab === 'All' && <AllTabComponent homeData={homeData} />}
+              {selectedFilterTab === 'Audiobooks' && <AudioBooksTabComponent homeData={homeData} />}
+              {selectedFilterTab === 'Ebooks' && <EbooksTabComponent homeData={homeData} />}
+              {selectedFilterTab === 'Magazines' && <MagazinesTabComponent homeData={homeData} />}
+              {selectedFilterTab === 'Podcasts' && <PodcastsTabComponent homeData={homeData} />}
+              {selectedFilterTab === 'Videos' && <VideosTabComponent homeData={homeData} />}
             </div>
           </>
         )}

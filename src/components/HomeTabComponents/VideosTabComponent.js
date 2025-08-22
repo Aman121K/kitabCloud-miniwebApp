@@ -6,56 +6,13 @@ import { colors } from '../../constants/colors';
 import BookCard from '../BookCard';
 import EmptyState from '../EmptyState';
 
-const VideosTabComponent = () => {
+const VideosTabComponent = ({ homeData }) => {
     const { token } = useAuth();
     const navigate = useNavigate();
-    const [videos, setVideos] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
 
-    useEffect(() => {
-        if (token) {
-            fetchVideos();
-        }
-    }, [token]);
-
-    const fetchVideos = async () => {
-        try {
-            setLoading(true);
-            setError(false);
-            const data = await apiFunctions.getVideos(token);
-            setVideos(data || []);
-        } catch (error) {
-            console.error('Error fetching videos:', error);
-            setError(true);
-            setVideos([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    // Extract videos from homeData - videos might be in ads or other sections
+    const videos = homeData?.ads?.filter(ad => ad.type === 'Video') || [];
     const validVideos = videos.filter(video => video && video.id);
-
-    if (loading) {
-        return (
-            <EmptyState 
-                loading={true}
-                loadingMessage="Loading videos..."
-            />
-        );
-    }
-
-    if (error) {
-        return (
-            <EmptyState 
-                icon="⚠️"
-                title="Unable to Load Videos"
-                message="We're having trouble loading videos right now. Please check your connection and try again."
-                showRetryButton={true}
-                onRetry={fetchVideos}
-            />
-        );
-    }
 
     if (!validVideos.length) {
         return (

@@ -6,46 +6,24 @@ import BookCard from '../BookCard';
 
 const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 
-const AudioBooksTabComponent = () => {
+const AudioBooksTabComponent = ({ homeData }) => {
     const { token } = useAuth();
     const navigate = useNavigate();
-    const [categories, setCategories] = useState([]);
-    const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (token) {
-            fetchAudiobooks();
-        }
-    }, [token]);
+    // Extract audiobooks from homeData
+    const categories = homeData?.categoryWithBooks || [];
+    const audiobookCategories = categories.filter(cat => 
+        cat.books && cat.books.length > 0 && 
+        cat.books.some(book => book.type === 'audio' || book.file_type === 'audio')
+    );
 
-    const fetchAudiobooks = async () => {
-        try {
-            setLoading(true);
-            const data = await apiFunctions.getAudiobooks(token);
-            setCategories(data || []);
-        } catch (error) {
-            console.error('Error fetching audiobooks:', error);
-            setCategories([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (loading) {
-        return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 40 }}>
-                <div style={{ width: 40, height: 40, border: '3px solid #f3f3f3', borderTop: '3px solid #e7440d', borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
-            </div>
-        );
-    }
-
-    if (!categories.length) {
+    if (!audiobookCategories.length) {
         return <div style={{ padding: 24, textAlign: 'center', color: '#888' }}>No audiobooks found.</div>;
     }
 
     return (
         <div style={{ padding: '0 8px', maxWidth: 500, margin: '0 auto' }}>
-            {categories.filter(cat => (cat.books && cat.books.length > 0)).map((cat) => (
+            {audiobookCategories.map((cat) => (
                 <div key={cat.id} style={{ marginBottom: 32 }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

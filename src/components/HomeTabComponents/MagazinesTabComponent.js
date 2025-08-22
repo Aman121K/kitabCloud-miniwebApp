@@ -6,56 +6,15 @@ import { colors } from '../../constants/colors';
 import BookCard from '../BookCard';
 import EmptyState from '../EmptyState';
 
-const MagazinesTabComponent = () => {
+const MagazinesTabComponent = ({ homeData }) => {
     const { token } = useAuth();
     const navigate = useNavigate();
-    const [magazines, setMagazines] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
 
-    useEffect(() => {
-        if (token) {
-            fetchMagazines();
-        }
-    }, [token]);
-
-    const fetchMagazines = async () => {
-        try {
-            setLoading(true);
-            setError(false);
-            const data = await apiFunctions.getMagazines(token);
-            setMagazines(data || []);
-        } catch (error) {
-            console.error('Error fetching magazines:', error);
-            setError(true);
-            setMagazines([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    // Extract magazines from homeData - magazines might be in categoryWithBooks with is_magazine flag
+    const magazines = homeData?.categoryWithBooks?.flatMap(cat => 
+        cat.books?.filter(book => book.is_magazine === 1) || []
+    ) || [];
     const validMagazines = magazines.filter(magazine => magazine && magazine.id);
-
-    if (loading) {
-        return (
-            <EmptyState 
-                loading={true}
-                loadingMessage="Loading magazines..."
-            />
-        );
-    }
-
-    if (error) {
-        return (
-            <EmptyState 
-                icon="⚠️"
-                title="Unable to Load Magazines"
-                message="We're having trouble loading magazines right now. Please check your connection and try again."
-                showRetryButton={true}
-                onRetry={fetchMagazines}
-            />
-        );
-    }
 
     if (!validMagazines.length) {
         return (

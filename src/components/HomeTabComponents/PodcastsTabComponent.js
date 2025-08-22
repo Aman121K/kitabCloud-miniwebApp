@@ -6,56 +6,13 @@ import { colors } from '../../constants/colors';
 import BookCard from '../BookCard';
 import EmptyState from '../EmptyState';
 
-const PodcastsTabComponent = () => {
+const PodcastsTabComponent = ({ homeData }) => {
     const { token } = useAuth();
     const navigate = useNavigate();
-    const [podcasts, setPodcasts] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
 
-    useEffect(() => {
-        if (token) {
-            fetchPodcasts();
-        }
-    }, [token]);
-
-    const fetchPodcasts = async () => {
-        try {
-            setLoading(true);
-            setError(false);
-            const data = await apiFunctions.getPodcasts(token);
-            setPodcasts(data || []);
-        } catch (error) {
-            console.error('Error fetching podcasts:', error);
-            setError(true);
-            setPodcasts([]);
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    // Extract podcasts from homeData - podcasts are in categoryWithPodcast
+    const podcasts = homeData?.categoryWithPodcast?.flatMap(cat => cat.podcasts || []) || [];
     const validPodcasts = podcasts.filter(podcast => podcast && podcast.id);
-
-    if (loading) {
-        return (
-            <EmptyState 
-                loading={true}
-                loadingMessage="Loading podcasts..."
-            />
-        );
-    }
-
-    if (error) {
-        return (
-            <EmptyState 
-                icon="⚠️"
-                title="Unable to Load Podcasts"
-                message="We're having trouble loading podcasts right now. Please check your connection and try again."
-                showRetryButton={true}
-                onRetry={fetchPodcasts}
-            />
-        );
-    }
 
     if (!validPodcasts.length) {
         return (

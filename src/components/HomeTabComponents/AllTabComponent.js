@@ -4,33 +4,9 @@ import { useAuth } from '../../context/AuthContext';
 import { apiFunctions } from '../../apiService/apiFunctions';
 import BookCard from '../BookCard';
 
-const AllTabComponent = () => {
+const AllTabComponent = ({ homeData }) => {
   const { token } = useAuth();
   const navigate = useNavigate();
-  const [homeData, setHomeData] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (token) {
-      fetchHomeData();
-    }
-    // eslint-disable-next-line
-  }, [token]);
-
-  const fetchHomeData = async () => {
-    setLoading(true);
-    try {
-      const res = await apiFunctions.getHomeData(token);
-      setHomeData(res);
-    } catch (err) {
-      setHomeData(null);
-    }
-    setLoading(false);
-  };
-
-  if (loading) {
-    return <div style={{ padding: 24, textAlign: 'center' }}>Loading...</div>;
-  }
 
   if (!homeData) {
     return <div style={{ padding: 24, textAlign: 'center', color: '#888' }}>No data available.</div>;
