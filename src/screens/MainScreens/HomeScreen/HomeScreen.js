@@ -9,6 +9,7 @@ import MagazinesTabComponent from '../../../components/HomeTabComponents/Magazin
 import PodcastsTabComponent from '../../../components/HomeTabComponents/PodcastsTabComponent';
 import VideosTabComponent from '../../../components/HomeTabComponents/VideosTabComponent';
 import BottomNavigation from '../../../components/BottomNavigation';
+import FeedbackFAB from '../../../components/FeedbackFAB';
 
 const FilterData = ['All', 'Audiobooks', 'Ebooks', 'Videos', 'Magazines', 'Podcasts'];
 
@@ -111,6 +112,7 @@ const HomeScreen = () => {
         )}
       </div>
       <BottomNavigation />
+      <FeedbackFAB />
     </div>
   );
 };

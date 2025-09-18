@@ -582,12 +582,29 @@ export const apiFunctions = {
     AddUserCategory: async (body, token) => {
         try {
             const res = await axios.post(BASE_URL + 'update/category', body, {
-                headers: { 'Authorization': `Bearer ${token}` }
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             })
             return res.data;
         } catch (error) {
             console.log('Error adding user category:', error);
             return null;
+        }
+    },
+    submitFeedback: async (token, feedbackData) => {
+        try {
+            const res = await axios.post(BASE_URL + 'feedback', feedbackData, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
+            console.log('Feedback submitted:', res.data);
+            return res.data;
+        } catch (error) {
+            console.log('Error submitting feedback:', error);
+            return { error: error.message };
         }
     }
 } 

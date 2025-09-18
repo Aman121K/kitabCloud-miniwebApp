@@ -19,6 +19,7 @@ import AllVideosPage from './screens/MainScreens/OtherScreens/AllVideosPage';
 import AllMagazinesPage from './screens/MainScreens/OtherScreens/AllMagazinesPage';
 import AllPodcastsPage from './screens/MainScreens/OtherScreens/AllPodcastsPage';
 import PlayerScreen from './screens/MainScreens/PlayerScreen/PlayerScreen';
+import FeedbackScreen from './screens/MainScreens/OtherScreens/FeedbackScreen';
 import AudioPlayer from './components/AudioPlayer/AudioPlayer';
 import './App.css';
 
@@ -142,6 +143,11 @@ const AppContent = () => {
                 <Route path="/player" element={
                     <ProtectedRoute>
                         <PlayerScreen />
+                    </ProtectedRoute>
+                } />
+                <Route path="/feedback" element={
+                    <ProtectedRoute>
+                        <FeedbackScreen />
                     </ProtectedRoute>
                 } />
                 <Route path="/" element={<Navigate to="/login" />} />
