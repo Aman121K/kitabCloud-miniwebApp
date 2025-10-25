@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { colors } from '../constants/colors';
-import { MdHome, MdSearch, MdPerson } from 'react-icons/md';
+import { MdHome, MdSearch, MdFavorite, MdPerson } from 'react-icons/md';
 
 const BottomNavigation = () => {
     const navigate = useNavigate();
@@ -10,6 +10,7 @@ const BottomNavigation = () => {
     const navItems = [
         { path: '/home', label: 'Home', icon: <MdHome /> },
         { path: '/search', label: 'Search', icon:  <MdSearch /> },
+        { path: '/favorites', label: 'Favorites', icon:  <MdFavorite /> },
         { path: '/profile', label: 'Profile', icon:  <MdPerson /> }
     ];
 

@@ -10,6 +10,7 @@ import CategorySelection from './screens/AuthScreens/CategorySelection';
 import WelcomePage from './screens/AuthScreens/WelcomePage';
 import HomeScreen from './screens/MainScreens/HomeScreen/HomeScreen';
 import SearchScreen from './screens/MainScreens/SearchScreen/SearchScreen';
+import FavoritesScreen from './screens/MainScreens/FavoritesScreen/FavoritesScreen';
 import ProfileScreen from './screens/MainScreens/ProfileScreen/ProfileScreen';
 import BookDetails from './screens/MainScreens/OtherScreens/BookDetails';
 import AllBooksPage from './screens/MainScreens/OtherScreens/AllBooksPage';
@@ -98,6 +99,11 @@ const AppContent = () => {
                 <Route path="/search" element={
                     <ProtectedRoute>
                         <SearchScreen />
+                    </ProtectedRoute>
+                } />
+                <Route path="/favorites" element={
+                    <ProtectedRoute>
+                        <FavoritesScreen />
                     </ProtectedRoute>
                 } />
                 <Route path="/profile" element={

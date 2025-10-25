@@ -189,6 +189,29 @@ const BookCard = ({ book }) => {
                     }}
                 />
                 
+                {/* Headphone icon to indicate audio availability */}
+                {(book.audio_url || book.bookaudio) && (
+                    <div style={{
+                        position: 'absolute',
+                        top: 10,
+                        left: 10,
+                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                        borderRadius: '50%',
+                        width: 32,
+                        height: 32,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        backdropFilter: 'blur(4px)'
+                    }}>
+                        <span style={{ 
+                            fontSize: 18,
+                            color: 'white',
+                            lineHeight: 1
+                        }}>🎧</span>
+                    </div>
+                )}
+                
                 {/* Hidden data for playlist context */}
                 {book.audio_url || book.bookaudio ? (
                     <div data-track={JSON.stringify(trackData)} style={{ display: 'none' }} />
@@ -234,28 +257,7 @@ const BookCard = ({ book }) => {
                     )}
                 </button>
                 
-                {(book.audio_url || book.bookaudio) && (
-                    <button
-                        onClick={handlePlay}
-                        style={{
-                            position: 'absolute',
-                            bottom: 20,
-                            right: 10,
-                            background: colors.appPrimary,
-                            border: 'none',
-                            borderRadius: '50%',
-                            width: 40,
-                            height: 40,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            cursor: 'pointer',
-                            color: colors.white
-                        }}
-                    >
-                        {isCurrentTrack && isPlaying ? '⏸️' : '▶️'}
-                    </button>
-                )}
+                {/* Play button removed - headphone icon indicates audio availability */}
             </div>
             
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>

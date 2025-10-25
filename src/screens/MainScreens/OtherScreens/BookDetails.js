@@ -76,18 +76,6 @@ const BookDetails = () => {
         }
     };
 
-    const handlePlayFullBook = () => {
-        if (book?.bookaudio) {
-            playTrack({
-                id: book.id,
-                title: book.title,
-                author: book.author,
-                cover_image: book.coverimage || book.image,
-                audio_url: (book.bookaudio.startsWith('http') ? book.bookaudio : FILE_BASE_URL + book.bookaudio),
-            });
-        }
-    };
-
     const handleLike = async () => {
         try {
             const response = await apiFunctions.likeUnlineBook(book.id, token);
@@ -299,7 +287,7 @@ const BookDetails = () => {
                                         cursor: 'pointer'
                                     }}
                                 >
-                                    Play Sample
+                                    Listen
                                 </button>
                             )}
                             {book.bookfile && (
@@ -315,7 +303,7 @@ const BookDetails = () => {
                                         cursor: 'pointer'
                                     }}
                                 >
-                                    Read E-book
+                                    Read Book
                                 </button>
                             )}
                         </div>

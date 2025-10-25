@@ -74,10 +74,11 @@ const AllTabComponent = ({ homeData }) => {
     );
   };
 
-  // New Books Section
+  // New Books Section - Get books from categoryWithBooks
   const NewBooksSection = () => {
-    const books = homeData.free_books || [];
-    const validBooks = books.filter(book => book && book.id);
+    const categories = homeData?.categoryWithBooks || [];
+    const allBooks = categories.flatMap(cat => cat.books || []);
+    const validBooks = allBooks.filter(book => book && book.id);
     
     if (!validBooks.length) {
       return (

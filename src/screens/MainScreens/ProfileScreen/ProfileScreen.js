@@ -7,6 +7,8 @@ import { commonStyles } from '../../../constants/commonStyles';
 import BookCard from '../../../components/BookCard';
 import BottomNavigation from '../../../components/BottomNavigation';
 
+const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
+
 const ProfileScreen = () => {
     const { user, token, logout } = useAuth();
     const navigate = useNavigate();
@@ -35,8 +37,15 @@ const ProfileScreen = () => {
 
     const fetchLikedBooks = async () => {
         try {
-            const data = await apiFunctions.getUserLikedBooks(token);
-            setLikedBooks(data || []);
+            const response = await apiFunctions.getUserLikedBooks(token);
+            
+            // Response structure: response[0].booklike is an array of { id, book: {...} }
+            // We need to extract the book objects
+            const booklikeArray = response[0]?.booklike || [];
+            const books = booklikeArray.map(item => item.book).filter(Boolean);
+            
+            console.log('Liked books data:', books);
+            setLikedBooks(books);
         } catch (error) {
             console.error('Error fetching liked books:', error);
             setLikedBooks([]);
@@ -52,24 +61,9 @@ const ProfileScreen = () => {
         }
     };
 
-    if (loading) {
-        return (
-            <div style={commonStyles.fullScreenContainer}>
-                <div style={commonStyles.centerContent}>
-                    <div style={{
-                        width: 40,
-                        height: 40,
-                        border: `3px solid ${colors.lightGrey}`,
-                        borderTop: `3px solid ${colors.appPrimary}`,
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                    }}></div>
-                </div>
-            </div>
-        );
-    }
-
+    // Always show bottom navigation - load content separately
     return (
+        <>
         <div style={{
             ...commonStyles.fullScreenContainer,
             paddingBottom: '80px' // Account for bottom navigation
@@ -231,12 +225,40 @@ const ProfileScreen = () => {
                         {likedBooks.length > 0 ? (
                             <div style={{
                                 display: 'grid',
-                                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))',
                                 gap: 16
                             }}>
-                                {likedBooks.map((book) => (
-                                    <BookCard key={book.id} book={book} />
-                                ))}
+                                {likedBooks.map((book) => {
+                                    // Safely extract author name
+                                    let authorName = 'Unknown Author';
+                                    if (typeof book.author === 'string') {
+                                        authorName = book.author;
+                                    } else if (book.author && typeof book.author === 'object' && book.author.name) {
+                                        authorName = book.author.name;
+                                    } else if (book.author_name) {
+                                        authorName = book.author_name;
+                                    }
+                                    
+                                    // Extract audio URL if available
+                                    const audioUrl = book.bookaudio ? `${FILE_BASE_URL}${book.bookaudio}` : (book.sample_audio || null);
+                                    
+                                    // Ensure book has required properties with proper image URLs
+                                    const safeBook = {
+                                        id: book.id,
+                                        title: book.title || 'Untitled',
+                                        author: authorName,
+                                        author_name: authorName,
+                                        coverimage: book.coverimage ? `${FILE_BASE_URL}${book.coverimage}` : '/logo192.png',
+                                        image: book.image ? `${FILE_BASE_URL}${book.image}` : null,
+                                        rating: parseFloat(book.average_rating) || 0,
+                                        is_liked: true, // These are liked books
+                                        audio_url: audioUrl,
+                                        bookaudio: book.bookaudio,
+                                        bookfile: book.bookfile ? `${FILE_BASE_URL}${book.bookfile}` : null
+                                    };
+                                    
+                                    return <BookCard key={book.id} book={safeBook} />;
+                                })}
                             </div>
                         ) : (
                             <div style={{
@@ -267,6 +289,30 @@ const ProfileScreen = () => {
             </div>
             <BottomNavigation />
         </div>
+            {loading && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: '80px', // Account for bottom nav
+                    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 999
+                }}>
+                    <div style={{
+                        width: 40,
+                        height: 40,
+                        border: `3px solid ${colors.lightGrey}`,
+                        borderTop: `3px solid ${colors.appPrimary}`,
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                    }}></div>
+                </div>
+            )}
+        </>
     );
 };
 

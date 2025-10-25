@@ -30,7 +30,7 @@ const EmptyState = ({
                     animation: 'spin 1s linear infinite',
                     marginBottom: 16
                 }}></div>
-                <p style={{ color: colors.grey, fontSize: 14 }}>{loadingMessage}</p>
+                <p style={{ color: '#4a4a4a', fontSize: 15 }}>{loadingMessage}</p>
             </div>
         );
     }
@@ -53,23 +53,24 @@ const EmptyState = ({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginBottom: 20
+                marginBottom: 24
             }}>
-                <span style={{ fontSize: 40, color: colors.grey }}>{icon}</span>
+                <span style={{ fontSize: 48 }}>{icon}</span>
             </div>
             <h3 style={{
                 fontSize: 20,
                 fontWeight: 600,
                 color: colors.darkGrey,
-                marginBottom: 8
+                marginBottom: 12
             }}>
                 {title}
             </h3>
             <p style={{
-                color: colors.grey,
-                fontSize: 14,
+                color: '#4a4a4a',
+                fontSize: 15,
                 marginBottom: 20,
-                maxWidth: 300
+                maxWidth: 300,
+                lineHeight: '1.5'
             }}>
                 {message}
             </p>
@@ -85,11 +86,11 @@ const EmptyState = ({
                     {tags.map((tag, index) => (
                         <span key={index} style={{
                             backgroundColor: tag.primary ? colors.appPrimary + '20' : colors.lightGrey,
-                            color: tag.primary ? colors.appPrimary : colors.grey,
+                            color: tag.primary ? colors.appPrimary : '#4a4a4a',
                             padding: '6px 12px',
                             borderRadius: 16,
-                            fontSize: 12,
-                            fontWeight: 500
+                            fontSize: 13,
+                            fontWeight: 600
                         }}>
                             {tag.text}
                         </span>
