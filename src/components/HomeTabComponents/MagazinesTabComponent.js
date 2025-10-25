@@ -7,6 +7,7 @@ import BookCard from '../BookCard';
 import EmptyState from '../EmptyState';
 
 const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
+const KITABCLOUD_LOGO = '/logo192.png'; // Local logo fallback
 
 const MagazinesTabComponent = ({ homeData }) => {
     const { token } = useAuth();
@@ -89,7 +90,7 @@ const MagazinesTabComponent = ({ homeData }) => {
                     title: magazine.title || 'Untitled',
                     author: authorName,
                     author_name: magazine.author_name || authorName,
-                    coverimage: magazine.coverimage ? `${FILE_BASE_URL}${magazine.coverimage}` : (magazine.image || '/favicon.ico'),
+                    coverimage: magazine.coverimage ? `${FILE_BASE_URL}${magazine.coverimage}` : (magazine.image ? `${FILE_BASE_URL}${magazine.image}` : KITABCLOUD_LOGO),
                     image: magazine.image ? `${FILE_BASE_URL}${magazine.image}` : magazine.image,
                     rating: magazine.rating || 0,
                     is_liked: magazine.is_liked || false,

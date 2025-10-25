@@ -65,7 +65,7 @@ const BookCard = ({ book }) => {
                 title: book.title || 'Untitled',
                 author: authorName,
                 author_name: book.author_name || authorName,
-                cover_image: getImageUrl(book.coverimage) || getImageUrl(book.image) || '/favicon.ico',
+                cover_image: getImageUrl(book.coverimage) || getImageUrl(book.image) || '/logo192.png',
                 image: getImageUrl(book.image),
                 audio_url: book.audio_url || book.bookaudio
             };
@@ -184,8 +184,8 @@ const BookCard = ({ book }) => {
                         marginBottom: 10,
                         aspectRatio: '3/4'
                     }}
-                    onError={(e) => {
-                        e.target.src = '/favicon.ico';
+                                                onError={(e) => {
+                        e.target.src = '/logo192.png';
                     }}
                 />
                 

@@ -493,28 +493,55 @@ export const apiFunctions = {
         const res = await axios.post(BASE_URL + 'forgot', reqObj)
     },
     getAudiobooks: async (token) => {
-        const res = await axios.get(BASE_URL + 'audio', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        return res.data.categoryWithAudioBooks
+        try {
+            const res = await axios.get(BASE_URL + 'audio', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            // Flatten the nested structure - books array contains audiobooks in each category
+            const allAudiobooks = (res.data.categoryWithAudioBooks || []).flatMap(
+                category => category.books || []
+            );
+            return allAudiobooks;
+        } catch (error) {
+            console.error('Error fetching audiobooks:', error);
+            return [];
+        }
     },
     getEbooks: async (token) => {
-        const res = await axios.get(BASE_URL + 'ebooks', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        return res.data.categoryWithEBooks
+        try {
+            const res = await axios.get(BASE_URL + 'ebooks', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            // Flatten the nested structure - books array contains ebooks in each category
+            const allEbooks = (res.data.categoryWithEBooks || []).flatMap(
+                category => category.books || []
+            );
+            return allEbooks;
+        } catch (error) {
+            console.error('Error fetching ebooks:', error);
+            return [];
+        }
     },
     getMagazines: async (token) => {
-        const res = await axios.get(BASE_URL + 'magazines', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        return res.data.categoryWithMagazines
+        try {
+            const res = await axios.get(BASE_URL + 'magazines', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            // Flatten the nested structure - magazines are in categoryWithMagazines array
+            const allMagazines = (res.data.categoryWithMagazines || []).flatMap(
+                category => category.books || []
+            );
+            return allMagazines;
+        } catch (error) {
+            console.error('Error fetching magazines:', error);
+            return [];
+        }
     },
     getVideos: async (token) => {
         try {

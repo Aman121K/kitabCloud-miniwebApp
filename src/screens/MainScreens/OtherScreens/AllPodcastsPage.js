@@ -7,6 +7,7 @@ import BookCard from '../../../components/BookCard';
 import EmptyState from '../../../components/EmptyState';
 
 const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
+const KITABCLOUD_LOGO = '/logo192.png'; // Local logo fallback
 
 const AllPodcastsPage = () => {
     const { token } = useAuth();
@@ -142,7 +143,7 @@ const AllPodcastsPage = () => {
                         title: podcast.title || 'Untitled',
                         author: authorName,
                         author_name: podcast.author_name || authorName,
-                        coverimage: podcast.coverimage ? `${FILE_BASE_URL}${podcast.coverimage}` : (podcast.image || '/favicon.ico'),
+                        coverimage: podcast.coverimage ? `${FILE_BASE_URL}${podcast.coverimage}` : (podcast.image ? `${FILE_BASE_URL}${podcast.image}` : KITABCLOUD_LOGO),
                         image: podcast.image ? `${FILE_BASE_URL}${podcast.image}` : podcast.image,
                         rating: podcast.rating || 0,
                         is_liked: podcast.is_liked || false,

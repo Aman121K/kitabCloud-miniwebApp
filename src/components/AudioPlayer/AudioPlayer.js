@@ -5,6 +5,9 @@ import { commonStyles } from '../../constants/commonStyles';
 import './AudioPlayer.css';
 
 const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
+// Use local logo as fallback to avoid remote loading issues
+const KITABCLOUD_LOGO = '/logo192.png'; // Local logo that won't flicker
+const KITABCLOUD_LOGO_REMOTE = "https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg";
 
 const AudioPlayer = () => {
     const {
@@ -66,14 +69,13 @@ const AudioPlayer = () => {
         };
 
         const coverImageUrl = getImageUrl();
-        const kitabcloudLogo = "https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg";
 
         return (
             <div className="audio-player-fab">
                 <div className="fab-container" onClick={() => setShowFullPlayer(true)}>
                     <div className="fab-logo">
                         <img 
-                            src={coverImageUrl || kitabcloudLogo} 
+                            src={coverImageUrl || KITABCLOUD_LOGO} 
                             alt={currentTrack.title || "KitabCloud"}
                             style={{
                                 width: '40px',
@@ -82,9 +84,9 @@ const AudioPlayer = () => {
                                 objectFit: 'cover'
                             }}
                             onError={(e) => {
-                                // If cover image fails to load, show KitabCloud logo
-                                if (e.target.src !== kitabcloudLogo) {
-                                    e.target.src = kitabcloudLogo;
+                                // If cover image fails to load, show local KitabCloud logo
+                                if (e.target.src !== KITABCLOUD_LOGO) {
+                                    e.target.src = KITABCLOUD_LOGO;
                                 }
                             }}
                         />
@@ -108,13 +110,16 @@ const AudioPlayer = () => {
                 <div className="player-header">
                     <div className="player-logo">
                         <img 
-                            src="https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg" 
+                            src={KITABCLOUD_LOGO} 
                             alt="KitabCloud"
                             style={{
                                 width: '30px',
                                 height: '30px',
                                 borderRadius: '50%',
                                 objectFit: 'cover'
+                            }}
+                            onError={(e) => {
+                                e.target.src = '/favicon.ico';
                             }}
                         />
                         <span style={{ marginLeft: '10px', fontWeight: 'bold', color: colors.appPrimary }}>
@@ -135,14 +140,16 @@ const AudioPlayer = () => {
                         <img 
                             src={(() => {
                                 const imagePath = currentTrack.cover_image || currentTrack.image;
-                                if (!imagePath) return "https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg";
+                                if (!imagePath) return KITABCLOUD_LOGO;
                                 if (imagePath.startsWith('http')) return imagePath;
                                 return `${FILE_BASE_URL}${imagePath}`;
                             })()}
                             alt={currentTrack.title}
                             onError={(e) => {
-                                // Fallback to KitabCloud logo if image fails to load
-                                e.target.src = "https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg";
+                                // Fallback to local KitabCloud logo if image fails to load
+                                if (e.target.src !== KITABCLOUD_LOGO) {
+                                    e.target.src = KITABCLOUD_LOGO;
+                                }
                             }}
                         />
                     </div>

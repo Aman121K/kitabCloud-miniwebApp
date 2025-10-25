@@ -7,6 +7,7 @@ import BookCard from '../../../components/BookCard';
 import EmptyState from '../../../components/EmptyState';
 
 const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
+const KITABCLOUD_LOGO = '/logo192.png'; // Local logo fallback
 
 const AllAudiobooksPage = () => {
     const { token } = useAuth();
@@ -142,7 +143,7 @@ const AllAudiobooksPage = () => {
                         title: audiobook.title || 'Untitled',
                         author: authorName,
                         author_name: audiobook.author_name || authorName,
-                        coverimage: audiobook.coverimage ? `${FILE_BASE_URL}${audiobook.coverimage}` : (audiobook.image ? `${FILE_BASE_URL}${audiobook.image}` : '/favicon.ico'),
+                        coverimage: audiobook.coverimage ? `${FILE_BASE_URL}${audiobook.coverimage}` : (audiobook.image ? `${FILE_BASE_URL}${audiobook.image}` : KITABCLOUD_LOGO),
                         image: audiobook.image ? `${FILE_BASE_URL}${audiobook.image}` : audiobook.image,
                         rating: audiobook.rating || 0,
                         is_liked: audiobook.is_liked || false,
