@@ -6,6 +6,8 @@ import { colors } from '../../../constants/colors';
 import BookCard from '../../../components/BookCard';
 import EmptyState from '../../../components/EmptyState';
 
+const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
+
 const AllVideosPage = () => {
     const { token } = useAuth();
     const navigate = useNavigate();
@@ -124,19 +126,29 @@ const AllVideosPage = () => {
                 padding: '0 4px'
             }}>
                 {validVideos.map((video) => {
-                    // Ensure video has required properties
+                    // Safely extract author name
+                    let authorName = 'Unknown Author';
+                    if (typeof video.author === 'string') {
+                        authorName = video.author;
+                    } else if (video.author && typeof video.author === 'object' && video.author.name) {
+                        authorName = video.author.name;
+                    } else if (video.author_name) {
+                        authorName = video.author_name;
+                    }
+                    
+                    // Ensure video has required properties with proper image URLs
                     const safeVideo = {
                         id: video.id,
                         title: video.title || 'Untitled',
-                        author: video.author || { name: 'Unknown Author' },
-                        author_name: video.author_name || 'Unknown Author',
-                        coverimage: video.coverimage || video.image,
-                        image: video.image,
+                        author: authorName,
+                        author_name: video.author_name || authorName,
+                        coverimage: video.coverimage ? `${FILE_BASE_URL}${video.coverimage}` : (video.image || '/favicon.ico'),
+                        image: video.image ? `${FILE_BASE_URL}${video.image}` : video.image,
                         rating: video.rating || 0,
                         is_liked: video.is_liked || false,
                         audio_url: video.audio_url,
                         bookaudio: video.bookaudio,
-                        bookfile: video.bookfile
+                        bookfile: video.bookfile ? `${FILE_BASE_URL}${video.bookfile}` : video.bookfile
                     };
                     
                     return <BookCard key={video.id} book={safeVideo} />;

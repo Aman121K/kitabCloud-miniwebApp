@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useAudioPlayer } from '../context/AudioPlayerContext';
@@ -7,7 +7,6 @@ import { colors } from '../constants/colors';
 import { commonStyles } from '../constants/commonStyles';
 
 const BookCard = ({ book }) => {
-    console.log("full image path>>",book)
     const { token } = useAuth();
     const { playTrack, currentTrack, isPlaying } = useAudioPlayer();
     const navigate = useNavigate();
@@ -42,8 +41,58 @@ const BookCard = ({ book }) => {
 
     const handlePlay = (e) => {
         e.stopPropagation();
-        if (book.audio_url) {
-            playTrack(book);
+        if (book.audio_url || book.bookaudio) {
+            // Safely get author name
+            let authorName = 'Unknown Author';
+            if (typeof book.author === 'string') {
+                authorName = book.author;
+            } else if (book.author && typeof book.author === 'object' && book.author.name) {
+                authorName = book.author.name;
+            } else if (book.author_name) {
+                authorName = book.author_name;
+            }
+            
+            // Create a proper track object with string author and proper image URLs
+            const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
+            const getImageUrl = (imgPath) => {
+                if (!imgPath) return null;
+                if (imgPath.startsWith('http')) return imgPath;
+                return `${FILE_BASE_URL}${imgPath}`;
+            };
+            
+            const track = {
+                id: book.id,
+                title: book.title || 'Untitled',
+                author: authorName,
+                author_name: book.author_name || authorName,
+                cover_image: getImageUrl(book.coverimage) || getImageUrl(book.image) || '/favicon.ico',
+                image: getImageUrl(book.image),
+                audio_url: book.audio_url || book.bookaudio
+            };
+            
+            // Try to get sibling tracks from the DOM context (same parent container)
+            let contextTracks = [];
+            try {
+                const cardElement = e.currentTarget.closest('[data-track-container]');
+                if (cardElement) {
+                    const allCards = Array.from(cardElement.parentElement.children);
+                    contextTracks = allCards
+                        .map(el => el.querySelector('[data-track]'))
+                        .filter(Boolean)
+                        .map(dataTrack => {
+                            try {
+                                return JSON.parse(dataTrack.dataset.track);
+                            } catch {
+                                return null;
+                            }
+                        })
+                        .filter(Boolean);
+                }
+            } catch (err) {
+                console.log('Could not get context tracks:', err);
+            }
+            
+            playTrack(track, 0, contextTracks);
         }
     };
 
@@ -72,8 +121,31 @@ const BookCard = ({ book }) => {
     const bookImage = book.coverimage || book.image || '/dummy-book.png';
     const bookRating = typeof book.rating === 'number' ? book.rating : 0;
 
+    // Prepare track data for context
+    const trackData = useMemo(() => {
+        // Safely get author name
+        let authorName = 'Unknown Author';
+        if (typeof book.author === 'string') {
+            authorName = book.author;
+        } else if (book.author && typeof book.author === 'object' && book.author.name) {
+            authorName = book.author.name;
+        } else if (book.author_name) {
+            authorName = book.author_name;
+        }
+        
+        return {
+            id: book.id,
+            title: book.title,
+            author: authorName,
+            author_name: book.author_name || authorName,
+            cover_image: book.coverimage || book.image,
+            audio_url: book.audio_url || book.bookaudio
+        };
+    }, [book]);
+
     return (
         <div 
+            data-track-container
             onClick={handleCardClick}
             style={{
                 backgroundColor: colors.white,
@@ -117,6 +189,11 @@ const BookCard = ({ book }) => {
                     }}
                 />
                 
+                {/* Hidden data for playlist context */}
+                {book.audio_url || book.bookaudio ? (
+                    <div data-track={JSON.stringify(trackData)} style={{ display: 'none' }} />
+                ) : null}
+                
                 <button
                     onClick={handleLike}
                     disabled={isLikeLoading}
@@ -157,7 +234,7 @@ const BookCard = ({ book }) => {
                     )}
                 </button>
                 
-                {book.audio_url && (
+                {(book.audio_url || book.bookaudio) && (
                     <button
                         onClick={handlePlay}
                         style={{

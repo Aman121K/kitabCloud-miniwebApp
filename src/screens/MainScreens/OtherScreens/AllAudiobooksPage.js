@@ -6,6 +6,8 @@ import { colors } from '../../../constants/colors';
 import BookCard from '../../../components/BookCard';
 import EmptyState from '../../../components/EmptyState';
 
+const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
+
 const AllAudiobooksPage = () => {
     const { token } = useAuth();
     const navigate = useNavigate();
@@ -124,19 +126,29 @@ const AllAudiobooksPage = () => {
                 padding: '0 4px'
             }}>
                 {validAudiobooks.map((audiobook) => {
-                    // Ensure audiobook has required properties
+                    // Safely extract author name
+                    let authorName = 'Unknown Author';
+                    if (typeof audiobook.author === 'string') {
+                        authorName = audiobook.author;
+                    } else if (audiobook.author && typeof audiobook.author === 'object' && audiobook.author.name) {
+                        authorName = audiobook.author.name;
+                    } else if (audiobook.author_name) {
+                        authorName = audiobook.author_name;
+                    }
+                    
+                    // Ensure audiobook has required properties with proper image URLs
                     const safeAudiobook = {
                         id: audiobook.id,
                         title: audiobook.title || 'Untitled',
-                        author: audiobook.author || { name: 'Unknown Author' },
-                        author_name: audiobook.author_name || 'Unknown Author',
-                        coverimage: audiobook.coverimage || audiobook.image,
-                        image: audiobook.image,
+                        author: authorName,
+                        author_name: audiobook.author_name || authorName,
+                        coverimage: audiobook.coverimage ? `${FILE_BASE_URL}${audiobook.coverimage}` : (audiobook.image ? `${FILE_BASE_URL}${audiobook.image}` : '/favicon.ico'),
+                        image: audiobook.image ? `${FILE_BASE_URL}${audiobook.image}` : audiobook.image,
                         rating: audiobook.rating || 0,
                         is_liked: audiobook.is_liked || false,
                         audio_url: audiobook.audio_url,
-                        bookaudio: audiobook.bookaudio,
-                        bookfile: audiobook.bookfile
+                        bookaudio: audiobook.bookaudio ? `${FILE_BASE_URL}${audiobook.bookaudio}` : audiobook.bookaudio,
+                        bookfile: audiobook.bookfile ? `${FILE_BASE_URL}${audiobook.bookfile}` : audiobook.bookfile
                     };
                     
                     return <BookCard key={audiobook.id} book={safeAudiobook} />;

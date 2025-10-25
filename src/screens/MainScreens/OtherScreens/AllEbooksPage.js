@@ -6,6 +6,8 @@ import { colors } from '../../../constants/colors';
 import BookCard from '../../../components/BookCard';
 import EmptyState from '../../../components/EmptyState';
 
+const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
+
 const AllEbooksPage = () => {
     const { token } = useAuth();
     const navigate = useNavigate();
@@ -124,19 +126,29 @@ const AllEbooksPage = () => {
                 padding: '0 4px'
             }}>
                 {validEbooks.map((ebook) => {
-                    // Ensure ebook has required properties
+                    // Safely extract author name
+                    let authorName = 'Unknown Author';
+                    if (typeof ebook.author === 'string') {
+                        authorName = ebook.author;
+                    } else if (ebook.author && typeof ebook.author === 'object' && ebook.author.name) {
+                        authorName = ebook.author.name;
+                    } else if (ebook.author_name) {
+                        authorName = ebook.author_name;
+                    }
+                    
+                    // Ensure ebook has required properties with proper image URLs
                     const safeEbook = {
                         id: ebook.id,
                         title: ebook.title || 'Untitled',
-                        author: ebook.author || { name: 'Unknown Author' },
-                        author_name: ebook.author_name || 'Unknown Author',
-                        coverimage: ebook.coverimage || ebook.image,
-                        image: ebook.image,
+                        author: authorName,
+                        author_name: ebook.author_name || authorName,
+                        coverimage: ebook.coverimage ? `${FILE_BASE_URL}${ebook.coverimage}` : (ebook.image ? `${FILE_BASE_URL}${ebook.image}` : '/favicon.ico'),
+                        image: ebook.image ? `${FILE_BASE_URL}${ebook.image}` : ebook.image,
                         rating: ebook.rating || 0,
                         is_liked: ebook.is_liked || false,
                         audio_url: ebook.audio_url,
                         bookaudio: ebook.bookaudio,
-                        bookfile: ebook.bookfile
+                        bookfile: ebook.bookfile ? `${FILE_BASE_URL}${ebook.bookfile}` : ebook.bookfile
                     };
                     
                     return <BookCard key={ebook.id} book={safeEbook} />;

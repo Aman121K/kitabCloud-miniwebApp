@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAudioPlayer } from '../../context/AudioPlayerContext';
 import { colors } from '../../constants/colors';
 import { commonStyles } from '../../constants/commonStyles';
 import './AudioPlayer.css';
+
+const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 
 const AudioPlayer = () => {
     const {
@@ -53,20 +55,37 @@ const AudioPlayer = () => {
         setVolumeLevel(newVolume);
     };
 
-    // Mini FAB with KitabCloud logo
+    // Mini FAB with cover image or KitabCloud logo
     if (!showFullPlayer) {
+        // Get cover image URL
+        const getImageUrl = () => {
+            const imagePath = currentTrack.cover_image || currentTrack.image;
+            if (!imagePath) return null;
+            if (imagePath.startsWith('http')) return imagePath;
+            return `${FILE_BASE_URL}${imagePath}`;
+        };
+
+        const coverImageUrl = getImageUrl();
+        const kitabcloudLogo = "https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg";
+
         return (
             <div className="audio-player-fab">
                 <div className="fab-container" onClick={() => setShowFullPlayer(true)}>
                     <div className="fab-logo">
                         <img 
-                            src="https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg" 
-                            alt="KitabCloud"
+                            src={coverImageUrl || kitabcloudLogo} 
+                            alt={currentTrack.title || "KitabCloud"}
                             style={{
                                 width: '40px',
                                 height: '40px',
                                 borderRadius: '50%',
                                 objectFit: 'cover'
+                            }}
+                            onError={(e) => {
+                                // If cover image fails to load, show KitabCloud logo
+                                if (e.target.src !== kitabcloudLogo) {
+                                    e.target.src = kitabcloudLogo;
+                                }
                             }}
                         />
                     </div>
@@ -114,14 +133,33 @@ const AudioPlayer = () => {
                 <div className="track-info">
                     <div className="track-image">
                         <img 
-                            src={currentTrack.cover_image || currentTrack.image || '/dummy-book.png'} 
+                            src={(() => {
+                                const imagePath = currentTrack.cover_image || currentTrack.image;
+                                if (!imagePath) return "https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg";
+                                if (imagePath.startsWith('http')) return imagePath;
+                                return `${FILE_BASE_URL}${imagePath}`;
+                            })()}
                             alt={currentTrack.title}
+                            onError={(e) => {
+                                // Fallback to KitabCloud logo if image fails to load
+                                e.target.src = "https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg";
+                            }}
                         />
                     </div>
                     <div className="track-details">
                         <h4 className="track-title">{currentTrack.title}</h4>
                         <p className="track-author">
-                            {currentTrack.author?.name || currentTrack.author_name || 'Unknown Author'}
+                            {(() => {
+                                // Safely get author string
+                                if (typeof currentTrack.author === 'string') {
+                                    return currentTrack.author;
+                                } else if (currentTrack.author && typeof currentTrack.author === 'object') {
+                                    return currentTrack.author.name || 'Unknown Author';
+                                } else if (currentTrack.author_name) {
+                                    return currentTrack.author_name;
+                                }
+                                return 'Unknown Author';
+                            })()}
                         </p>
                     </div>
                 </div>
@@ -153,7 +191,7 @@ const AudioPlayer = () => {
                     <button 
                         className="control-btn"
                         onClick={playPrevious}
-                        disabled={currentIndex === 0}
+                        disabled={playlist.length <= 1}
                     >
                         ⏮️
                     </button>
@@ -168,7 +206,7 @@ const AudioPlayer = () => {
                     <button 
                         className="control-btn"
                         onClick={playNext}
-                        disabled={currentIndex === playlist.length - 1}
+                        disabled={playlist.length <= 1}
                     >
                         ⏭️
                     </button>

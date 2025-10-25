@@ -6,6 +6,8 @@ import { colors } from '../../constants/colors';
 import BookCard from '../BookCard';
 import EmptyState from '../EmptyState';
 
+const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
+
 const MagazinesTabComponent = ({ homeData }) => {
     const { token } = useAuth();
     const navigate = useNavigate();
@@ -71,14 +73,24 @@ const MagazinesTabComponent = ({ homeData }) => {
                 padding: '20px 0'
             }}>
                 {validMagazines.map((magazine, index) => {
-                // Ensure magazine has required properties
+                // Safely extract author name
+                let authorName = 'Unknown Author';
+                if (typeof magazine.author === 'string') {
+                    authorName = magazine.author;
+                } else if (magazine.author && typeof magazine.author === 'object' && magazine.author.name) {
+                    authorName = magazine.author.name;
+                } else if (magazine.author_name) {
+                    authorName = magazine.author_name;
+                }
+                
+                // Ensure magazine has required properties with proper image URLs
                 const safeMagazine = {
                     id: magazine.id,
                     title: magazine.title || 'Untitled',
-                    author: magazine.author || { name: 'Unknown Author' },
-                    author_name: magazine.author_name || 'Unknown Author',
-                    coverimage: magazine.coverimage || magazine.image,
-                    image: magazine.image,
+                    author: authorName,
+                    author_name: magazine.author_name || authorName,
+                    coverimage: magazine.coverimage ? `${FILE_BASE_URL}${magazine.coverimage}` : (magazine.image || '/favicon.ico'),
+                    image: magazine.image ? `${FILE_BASE_URL}${magazine.image}` : magazine.image,
                     rating: magazine.rating || 0,
                     is_liked: magazine.is_liked || false,
                     audio_url: magazine.audio_url,

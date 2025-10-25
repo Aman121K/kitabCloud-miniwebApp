@@ -6,6 +6,8 @@ import { colors } from '../../constants/colors';
 import BookCard from '../BookCard';
 import EmptyState from '../EmptyState';
 
+const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
+
 const PodcastsTabComponent = ({ homeData }) => {
     const { token } = useAuth();
     const navigate = useNavigate();
@@ -69,14 +71,24 @@ const PodcastsTabComponent = ({ homeData }) => {
                 padding: '20px 0'
             }}>
                 {validPodcasts.map((podcast, index) => {
-                // Ensure podcast has required properties
+                // Safely extract author name
+                let authorName = 'Unknown Author';
+                if (typeof podcast.author === 'string') {
+                    authorName = podcast.author;
+                } else if (podcast.author && typeof podcast.author === 'object' && podcast.author.name) {
+                    authorName = podcast.author.name;
+                } else if (podcast.author_name) {
+                    authorName = podcast.author_name;
+                }
+                
+                // Ensure podcast has required properties with proper image URLs
                 const safePodcast = {
                     id: podcast.id,
                     title: podcast.title || 'Untitled',
-                    author: podcast.author || { name: 'Unknown Author' },
-                    author_name: podcast.author_name || 'Unknown Author',
-                    coverimage: podcast.coverimage || podcast.image,
-                    image: podcast.image,
+                    author: authorName,
+                    author_name: podcast.author_name || authorName,
+                    coverimage: podcast.coverimage ? `${FILE_BASE_URL}${podcast.coverimage}` : (podcast.image || '/favicon.ico'),
+                    image: podcast.image ? `${FILE_BASE_URL}${podcast.image}` : podcast.image,
                     rating: podcast.rating || 0,
                     is_liked: podcast.is_liked || false,
                     audio_url: podcast.audio_url,

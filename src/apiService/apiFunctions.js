@@ -281,16 +281,20 @@ export const apiFunctions = {
     },
     postReview: async (token, reqObj) => {
         try {
+            console.log('Submitting review with data:', reqObj);
             const res = await axios.post(BASE_URL + 'review', reqObj, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
-            })
-            console.log('Response is', res.data)
-            return res.data
-        }
-        catch (err) {
-            console.log('Error is', err)
+            });
+            console.log('Review response:', res.data);
+            return res.data;
+        } catch (err) {
+            console.error('Error submitting review:', err.response?.data || err.message);
+            return { 
+                error: err.response?.data?.message || err.message || 'Failed to submit review',
+                success: false
+            };
         }
     },
     storeBookPlayed: async (token, reqObj) => {
@@ -513,21 +517,39 @@ export const apiFunctions = {
         return res.data.categoryWithMagazines
     },
     getVideos: async (token) => {
-        const res = await axios.get(BASE_URL + 'videos', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        return res.data.categoryWithVideos
+        try {
+            const res = await axios.get(BASE_URL + 'videos', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            // Flatten the nested structure - videos are in categoryWithVideos array
+            const allVideos = (res.data.categoryWithVideos || []).flatMap(
+                category => category.videos || []
+            );
+            return allVideos;
+        } catch (error) {
+            console.error('Error fetching videos:', error);
+            return [];
+        }
     },
     getPodcasts: async (token) => {
-        const res = await axios.get(BASE_URL + 'podcast', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-        console.log('Podcasts are', res.data)
-        return res.data.categoryWithPodcast
+        try {
+            const res = await axios.get(BASE_URL + 'podcast', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log('Podcasts are', res.data);
+            // Flatten the nested structure - podcasts are in categoryWithPodcast array
+            const allPodcasts = (res.data.categoryWithPodcast || []).flatMap(
+                category => category.podcasts || []
+            );
+            return allPodcasts;
+        } catch (error) {
+            console.error('Error fetching podcasts:', error);
+            return [];
+        }
     },
     logoutUser: async (token) => {
         const res = await axios.get(BASE_URL + 'logout?token=' + token, {

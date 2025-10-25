@@ -21,12 +21,16 @@ const BookDetails = () => {
     const [showFullDesc, setShowFullDesc] = useState(false);
     const [reviews, setReviews] = useState([]);
     const [userRating, setUserRating] = useState(0);
+    const [userReview, setUserReview] = useState('');
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
     const [moreBooks, setMoreBooks] = useState([]);
     const { playTrack } = useAudioPlayer();
 
     useEffect(() => {
         if (token && id) {
             fetchBookDetails();
+            fetchReviews();
         }
     }, [token, id]);
 
@@ -45,6 +49,18 @@ const BookDetails = () => {
             setError('Failed to load book details');
         } finally {
             setLoading(false);
+        }
+    };
+
+    const fetchReviews = async () => {
+        try {
+            // TODO: Replace with actual API call when review endpoint is available
+            // const data = await apiFunctions.getBookReviews(id, token);
+            // setReviews(data || []);
+            setReviews([]);
+        } catch (error) {
+            console.error('Error fetching reviews:', error);
+            setReviews([]);
         }
     };
 
@@ -85,7 +101,66 @@ const BookDetails = () => {
 
     const handleUserRating = (rating) => {
         setUserRating(rating);
-        // TODO: Implement rating submission to API
+    };
+
+    const handleWriteReview = () => {
+        if (userRating === 0) {
+            alert('Please select a rating before writing a review');
+            return;
+        }
+        setShowReviewModal(true);
+    };
+
+    const handleSubmitReview = async () => {
+        if (!userReview.trim()) {
+            alert('Please write a review before submitting');
+            return;
+        }
+
+        if (userRating === 0) {
+            alert('Please select a rating');
+            return;
+        }
+
+        setIsSubmittingReview(true);
+        try {
+            const reviewData = {
+                book_id: book.id,
+                rating: userRating,
+                review: userReview
+            };
+
+            console.log('Submitting review data:', reviewData);
+            const response = await apiFunctions.postReview(token, reviewData);
+            console.log('Review API response:', response);
+            
+            // Check if the review was successfully saved
+            if (response && (response.success === true || response.success === undefined)) {
+                // Add review to local state
+                const newReview = {
+                    user: 'You',
+                    rating: userRating,
+                    text: userReview,
+                    date: new Date().toISOString()
+                };
+                setReviews(prev => [newReview, ...prev]);
+                
+                // Reset form
+                setUserRating(0);
+                setUserReview('');
+                setShowReviewModal(false);
+                alert('Thank you for your review!');
+            } else {
+                const errorMessage = response?.error || response?.message || 'Failed to submit review';
+                console.error('Review submission failed:', errorMessage);
+                alert(`Failed to submit review: ${errorMessage}`);
+            }
+        } catch (error) {
+            console.error('Error submitting review:', error);
+            alert('Failed to submit review. Please check your connection and try again.');
+        } finally {
+            setIsSubmittingReview(false);
+        }
     };
 
     const formatDate = (dateString) => {
@@ -148,7 +223,10 @@ const BookDetails = () => {
     };
     
     const authorName = book.author?.name || book.author_name || 'Unknown Author';
-    const publisher = book.publisher || 'Kitab Cloud originals';
+    // Safely get publisher name
+    const publisher = typeof book.publisher === 'string' 
+        ? book.publisher 
+        : (book.publisher?.name || 'Kitab Cloud originals');
     const releaseDate = formatDate(book.created_at) || '01 Jan 2023';
     const language = book.language || 'Somali';
     const length = book.length || '2 hr 22 min';
@@ -160,12 +238,8 @@ const BookDetails = () => {
     const showSeeMore = desc.length > descLimit;
     const descToShow = showFullDesc ? desc : desc.slice(0, descLimit) + (showSeeMore ? '...' : '');
 
-    // Placeholder reviews
-    const reviewsToShow = reviews.length > 0 ? reviews.slice(0, 1) : [{
-        user: 'Ayan Khan',
-        rating: 5,
-        text: 'Lorem ipsum dolor sit amet consectetur. Mauris volutpat aliquam eu dictum. Pellentesque gravida euismod eu diam quis. Eu quis pretium et pharetra gravida.'
-    }];
+    // Reviews to show (only real reviews, no hardcoded data)
+    const reviewsToShow = reviews.slice(0, 2);
 
     // Placeholder more books
     const moreBooksToShow = moreBooks.length > 0 ? moreBooks : [
@@ -296,14 +370,30 @@ const BookDetails = () => {
                 {/* Reviews */}
                 <div style={{ marginBottom: 18 }}>
                     <div style={{ display: 'flex', alignItems: 'center', marginBottom: 6 }}>
-                        <div style={{ ...commonStyles.textLightBold(16), flex: 1 }}>Reviews ({reviews.length || 1})</div>
-                        <span style={{ color: colors.appPrimary, fontSize: 14, cursor: 'pointer' }}>See All</span>
+                        <div style={{ ...commonStyles.textLightBold(16), flex: 1 }}>Reviews ({reviews.length})</div>
                     </div>
-                    <div style={{ background: colors.lightGrey, borderRadius: 8, padding: 12, marginBottom: 6 }}>
-                        <div style={{ ...commonStyles.textLightBold(14), marginBottom: 2 }}>{reviewsToShow[0].user}</div>
-                        <div style={{ color: colors.appPrimary, fontSize: 13, marginBottom: 4 }}>★ {reviewsToShow[0].rating}</div>
-                        <div style={{ ...commonStyles.textLightNormal(13), color: colors.grey }}>{reviewsToShow[0].text}</div>
-                    </div>
+                    {reviewsToShow.length > 0 ? (
+                        reviewsToShow.map((review, index) => (
+                            <div key={index} style={{ background: colors.lightGrey, borderRadius: 8, padding: 12, marginBottom: 8 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                                    <div style={{ ...commonStyles.textLightBold(14) }}>{review.user || 'Anonymous'}</div>
+                                    <div style={{ color: colors.appPrimary, fontSize: 13 }}>★ {review.rating}</div>
+                                </div>
+                                <div style={{ ...commonStyles.textLightNormal(13), color: colors.grey, marginBottom: 4 }}>{review.text}</div>
+                                {review.date && (
+                                    <div style={{ fontSize: 11, color: colors.grey }}>
+                                        {formatDate(review.date)}
+                                    </div>
+                                )}
+                            </div>
+                        ))
+                    ) : (
+                        <div style={{ background: colors.lightGrey, borderRadius: 8, padding: 20, textAlign: 'center' }}>
+                            <p style={{ ...commonStyles.textLightNormal(14), color: colors.grey, margin: 0 }}>
+                                No reviews yet. Be the first to review this book!
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* User Rating */}
@@ -318,9 +408,130 @@ const BookDetails = () => {
                             >★</span>
                         ))}
                     </div>
-                    <span style={{ color: colors.appPrimary, fontSize: 14, cursor: 'pointer' }}>Write a Review</span>
+                    <button
+                        onClick={handleWriteReview}
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            color: colors.appPrimary,
+                            fontSize: 14,
+                            cursor: 'pointer',
+                            padding: 0,
+                            textAlign: 'left'
+                        }}
+                    >
+                        Write a Review
+                    </button>
                 </div>
             </div>
+
+            {/* Review Modal */}
+            {showReviewModal && (
+                <div
+                    style={{
+                        position: 'fixed',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'rgba(0, 0, 0, 0.5)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 2000,
+                        padding: 20
+                    }}
+                    onClick={() => setShowReviewModal(false)}
+                >
+                    <div
+                        style={{
+                            background: colors.white,
+                            borderRadius: 12,
+                            padding: 24,
+                            maxWidth: 500,
+                            width: '100%',
+                            maxHeight: '80vh',
+                            overflow: 'auto'
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h3 style={{ ...commonStyles.textLightBold(20), marginBottom: 16 }}>Write a Review</h3>
+                        
+                        {/* Rating Stars */}
+                        <div style={{ marginBottom: 16 }}>
+                            <label style={{ ...commonStyles.textLightBold(14), display: 'block', marginBottom: 8 }}>Your Rating</label>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                {[1,2,3,4,5].map(star => (
+                                    <span
+                                        key={star}
+                                        style={{ fontSize: 32, color: userRating >= star ? colors.appPrimary : colors.lightGrey, cursor: 'pointer' }}
+                                        onClick={() => handleUserRating(star)}
+                                    >★</span>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Review Text */}
+                        <div style={{ marginBottom: 20 }}>
+                            <label style={{ ...commonStyles.textLightBold(14), display: 'block', marginBottom: 8 }}>Your Review</label>
+                            <textarea
+                                value={userReview}
+                                onChange={(e) => setUserReview(e.target.value)}
+                                placeholder="Share your thoughts about this book..."
+                                style={{
+                                    width: '100%',
+                                    minHeight: 120,
+                                    padding: 12,
+                                    border: `1px solid ${colors.lightGrey}`,
+                                    borderRadius: 8,
+                                    fontSize: 14,
+                                    fontFamily: 'inherit',
+                                    resize: 'vertical'
+                                }}
+                            />
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div style={{ display: 'flex', gap: 12 }}>
+                            <button
+                                onClick={() => {
+                                    setShowReviewModal(false);
+                                    setUserReview('');
+                                }}
+                                style={{
+                                    flex: 1,
+                                    padding: '12px 24px',
+                                    backgroundColor: colors.lightGrey,
+                                    color: colors.grey,
+                                    border: 'none',
+                                    borderRadius: 8,
+                                    fontSize: 14,
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSubmitReview}
+                                disabled={isSubmittingReview || userRating === 0 || !userReview.trim()}
+                                style={{
+                                    flex: 1,
+                                    padding: '12px 24px',
+                                    backgroundColor: isSubmittingReview || userRating === 0 || !userReview.trim() ? colors.lightGrey : colors.appPrimary,
+                                    color: colors.white,
+                                    border: 'none',
+                                    borderRadius: 8,
+                                    fontSize: 14,
+                                    cursor: isSubmittingReview || userRating === 0 || !userReview.trim() ? 'not-allowed' : 'pointer'
+                                }}
+                            >
+                                {isSubmittingReview ? 'Submitting...' : 'Submit Review'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Render AudioPlayer only if audio is playing */}
             <AudioPlayer />
         </div>

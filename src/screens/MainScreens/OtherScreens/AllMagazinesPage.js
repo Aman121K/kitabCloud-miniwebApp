@@ -6,6 +6,8 @@ import { colors } from '../../../constants/colors';
 import BookCard from '../../../components/BookCard';
 import EmptyState from '../../../components/EmptyState';
 
+const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
+
 const AllMagazinesPage = () => {
     const { token } = useAuth();
     const navigate = useNavigate();
@@ -24,7 +26,11 @@ const AllMagazinesPage = () => {
             setLoading(true);
             setError(false);
             const data = await apiFunctions.getMagazines(token);
-            setMagazines(data || []);
+            // Flatten the nested structure
+            const allMagazines = (data || []).flatMap(category => 
+                category.books?.filter(book => book.is_magazine === 1) || []
+            );
+            setMagazines(allMagazines);
         } catch (error) {
             console.error('Error fetching magazines:', error);
             setError(true);
@@ -124,19 +130,29 @@ const AllMagazinesPage = () => {
                 padding: '0 4px'
             }}>
                 {validMagazines.map((magazine) => {
-                    // Ensure magazine has required properties
+                    // Safely extract author name
+                    let authorName = 'Unknown Author';
+                    if (typeof magazine.author === 'string') {
+                        authorName = magazine.author;
+                    } else if (magazine.author && typeof magazine.author === 'object' && magazine.author.name) {
+                        authorName = magazine.author.name;
+                    } else if (magazine.author_name) {
+                        authorName = magazine.author_name;
+                    }
+                    
+                    // Ensure magazine has required properties with proper image URLs
                     const safeMagazine = {
                         id: magazine.id,
                         title: magazine.title || 'Untitled',
-                        author: magazine.author || { name: 'Unknown Author' },
-                        author_name: magazine.author_name || 'Unknown Author',
-                        coverimage: magazine.coverimage || magazine.image,
-                        image: magazine.image,
+                        author: authorName,
+                        author_name: magazine.author_name || authorName,
+                        coverimage: magazine.coverimage ? `${FILE_BASE_URL}${magazine.coverimage}` : (magazine.image || '/favicon.ico'),
+                        image: magazine.image ? `${FILE_BASE_URL}${magazine.image}` : magazine.image,
                         rating: magazine.rating || 0,
                         is_liked: magazine.is_liked || false,
                         audio_url: magazine.audio_url,
                         bookaudio: magazine.bookaudio,
-                        bookfile: magazine.bookfile
+                        bookfile: magazine.bookfile ? `${FILE_BASE_URL}${magazine.bookfile}` : magazine.bookfile
                     };
                     
                     return <BookCard key={magazine.id} book={safeMagazine} />;

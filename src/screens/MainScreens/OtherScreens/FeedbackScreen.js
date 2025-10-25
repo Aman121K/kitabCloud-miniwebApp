@@ -5,6 +5,7 @@ import { apiFunctions } from '../../../apiService/apiFunctions';
 import CommonButton from '../../../components/CommonButton';
 import { colors } from '../../../constants/colors';
 import { commonStyles } from '../../../constants/commonStyles';
+import axios from 'axios';
 
 const FeedbackScreen = () => {
   const navigate = useNavigate();
@@ -23,12 +24,21 @@ const FeedbackScreen = () => {
     setSubmitStatus(null);
 
     try {
-      const response = await apiFunctions.submitFeedback(token, {
+      const response = await axios.post('http://localhost:3002/api/admin/feedback', {
         feedback: feedback.trim(),
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString().slice(0, 19).replace('T', ' ')
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
-
+      // const response = await apiFunctions.submitFeedback(token, {
+      //   feedback: feedback.trim(),
+      //   timestamp: new Date().toISOString()
+      // });
+      console.log('Response is', response)
       if (response && response.success) {
+
         setSubmitStatus('success');
         setFeedback('');
         // Auto navigate back after 2 seconds
@@ -120,7 +130,7 @@ const FeedbackScreen = () => {
           }}>
             <span style={{ marginRight: '10px', fontSize: '20px' }}>✅</span>
             <div>
-              <strong>Thank you!</strong> Your feedback has been submitted successfully. 
+              <strong>Thank you!</strong> Your feedback has been submitted successfully.
               Our team will review it and consider it for future improvements.
             </div>
           </div>
@@ -140,7 +150,7 @@ const FeedbackScreen = () => {
           }}>
             <span style={{ marginRight: '10px', fontSize: '20px' }}>❌</span>
             <div>
-              <strong>Error!</strong> There was a problem submitting your feedback. 
+              <strong>Error!</strong> There was a problem submitting your feedback.
               Please try again.
             </div>
           </div>
@@ -161,7 +171,7 @@ const FeedbackScreen = () => {
           }}>
             Share Your Feedback
           </h3>
-          
+
           <textarea
             value={feedback}
             onChange={(e) => setFeedback(e.target.value)}
@@ -186,7 +196,7 @@ const FeedbackScreen = () => {
               e.target.style.borderColor = colors.lightGrey;
             }}
           />
-          
+
           <div style={{
             marginTop: '10px',
             fontSize: '14px',
