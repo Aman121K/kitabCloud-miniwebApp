@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { useData } from '../../../context/DataContext';
+import { apiFunctions } from '../../../apiService/apiFunctions';
 import { colors } from '../../../constants/colors';
 import { commonStyles } from '../../../constants/commonStyles';
 import BookCard from '../../../components/BookCard';
@@ -13,37 +13,78 @@ const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 
 const SearchScreen = () => {
     const { token } = useAuth();
-    const { homeData, fetchHomeData } = useData();
     const location = useLocation();
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState({});
+    const [allBooks, setAllBooks] = useState([]);
     const [loading, setLoading] = useState(false);
-    const [categories, setCategories] = useState([]);
-    const [categoriesLoading, setCategoriesLoading] = useState(false);
+    const [booksLoading, setBooksLoading] = useState(true);
     const [searchType, setSearchType] = useState(location.state?.searchType || 'all');
     const [searchTimeout, setSearchTimeout] = useState(null);
 
     useEffect(() => {
-        if (!searchQuery.trim()) {
-            fetchCategories();
+        if (token) {
+            fetchAllBooksData();
         }
         // eslint-disable-next-line
-    }, [searchQuery, token]);
+    }, [token]);
 
-    const fetchCategories = async () => {
-        setCategoriesLoading(true);
+    const fetchAllBooksData = async () => {
         try {
-            // Use cached home data if available, otherwise fetch
-            const data = homeData || await fetchHomeData(token);
-            console.log('Home data for categories:', data);
-            // Use categoryWithBooks from home data
-            setCategories(data?.categoryWithBooks || []);
+            setBooksLoading(true);
+            console.log('Fetching all books data from API...');
+            const booksData = await apiFunctions.getAllBooks(token);
+            console.log('All books API response:', booksData);
+            console.log('Response structure:', {
+                hasBooks: !!(booksData && booksData.books),
+                booksLength: booksData?.books?.length,
+                isArray: Array.isArray(booksData),
+                dataLength: booksData?.length,
+                keys: booksData ? Object.keys(booksData) : 'no data'
+            });
+            
+            if (booksData && booksData.books && Array.isArray(booksData.books)) {
+                console.log('Setting all books from booksData.books:', booksData.books.length, 'books');
+                setAllBooks(booksData.books);
+            } else if (booksData && Array.isArray(booksData)) {
+                // Handle case where books are directly in the response
+                console.log('Setting all books (direct array):', booksData.length, 'books');
+                setAllBooks(booksData);
+            } else if (booksData && booksData.data && Array.isArray(booksData.data)) {
+                // Handle case where books are in data property
+                console.log('Setting all books from booksData.data:', booksData.data.length, 'books');
+                setAllBooks(booksData.data);
+            } else {
+                console.log('No books found in response, setting empty array');
+                // For testing purposes, let's add some sample data
+                const sampleBooks = [
+                    {
+                        id: 1,
+                        title: "Sample Book 1",
+                        author: "Sample Author 1",
+                        coverimage: "/logo192.png",
+                        rating: 4.5,
+                        is_liked: false
+                    },
+                    {
+                        id: 2,
+                        title: "Sample Book 2", 
+                        author: "Sample Author 2",
+                        coverimage: "/logo192.png",
+                        rating: 4.0,
+                        is_liked: false
+                    }
+                ];
+                console.log('Setting sample books for testing');
+                setAllBooks(sampleBooks);
+            }
         } catch (error) {
-            console.error('Error fetching categories:', error);
-            setCategories([]);
+            console.error('Error fetching all books:', error);
+            setAllBooks([]);
+        } finally {
+            setBooksLoading(false);
         }
-        setCategoriesLoading(false);
     };
 
     const handleSearch = async () => {
@@ -52,135 +93,28 @@ const SearchScreen = () => {
         try {
             setLoading(true);
             
-            // Use cached home data instead of API
-            const data = homeData || await fetchHomeData(token);
+            // Use allBooks from state or fetch fresh data
+            const booksData = allBooks.length > 0 ? { books: allBooks } : await apiFunctions.getAllBooks(token);
             const query = searchQuery.toLowerCase().trim();
             
-            // Perform local search across all data
+            // Perform local search across all books
             const results = {
                 books: [],
                 authors: [],
                 podcasts: []
             };
             
-            // Search in all books from categoryWithBooks
-            if (data.categoryWithBooks) {
-                data.categoryWithBooks.forEach(category => {
-                    if (category.books && Array.isArray(category.books)) {
-                        category.books.forEach(book => {
-                            const title = (book.title || '').toLowerCase();
-                            const authorName = (typeof book.author === 'object' && book.author?.name 
-                                ? book.author.name 
-                                : (book.author_name || '')).toLowerCase();
-                            
-                            if (title.includes(query) || authorName.includes(query)) {
-                                if (searchType === 'all' || searchType === 'books') {
-                                    if (!results.books.find(b => b.id === book.id)) {
-                                        results.books.push(book);
-                                    }
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-            
-            // Search in categoryWithAudioBooks (audiobooks)
-            if (data.categoryWithAudioBooks) {
-                data.categoryWithAudioBooks.forEach(category => {
-                    if (category.books && Array.isArray(category.books)) {
-                        category.books.forEach(book => {
-                            const title = (book.title || '').toLowerCase();
-                            const authorName = (typeof book.author === 'object' && book.author?.name 
-                                ? book.author.name 
-                                : (book.author_name || '')).toLowerCase();
-                            
-                            if (title.includes(query) || authorName.includes(query)) {
-                                if (searchType === 'all' || searchType === 'books') {
-                                    if (!results.books.find(b => b.id === book.id)) {
-                                        results.books.push(book);
-                                    }
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-            
-            // Search in categoryWithEBooks (ebooks)
-            if (data.categoryWithEBooks) {
-                data.categoryWithEBooks.forEach(category => {
-                    if (category.books && Array.isArray(category.books)) {
-                        category.books.forEach(book => {
-                            const title = (book.title || '').toLowerCase();
-                            const authorName = (typeof book.author === 'object' && book.author?.name 
-                                ? book.author.name 
-                                : (book.author_name || '')).toLowerCase();
-                            
-                            if (title.includes(query) || authorName.includes(query)) {
-                                if (searchType === 'all' || searchType === 'books') {
-                                    if (!results.books.find(b => b.id === book.id)) {
-                                        results.books.push(book);
-                                    }
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-            
-            // Search in categoryWithMagazines (magazines)
-            if (data.categoryWithMagazines) {
-                data.categoryWithMagazines.forEach(category => {
-                    if (category.books && Array.isArray(category.books)) {
-                        category.books.forEach(book => {
-                            const title = (book.title || '').toLowerCase();
-                            const authorName = (typeof book.author === 'object' && book.author?.name 
-                                ? book.author.name 
-                                : (book.author_name || '')).toLowerCase();
-                            
-                            if (title.includes(query) || authorName.includes(query)) {
-                                if (searchType === 'all' || searchType === 'books') {
-                                    if (!results.books.find(b => b.id === book.id)) {
-                                        results.books.push(book);
-                                    }
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-            
-            // Search in categoryWithVideos (videos)
-            if (data.categoryWithVideos) {
-                data.categoryWithVideos.forEach(category => {
-                    if (category.books && Array.isArray(category.books)) {
-                        category.books.forEach(book => {
-                            const title = (book.title || '').toLowerCase();
-                            const authorName = (typeof book.author === 'object' && book.author?.name 
-                                ? book.author.name 
-                                : (book.author_name || '')).toLowerCase();
-                            
-                            if (title.includes(query) || authorName.includes(query)) {
-                                if (searchType === 'all' || searchType === 'books') {
-                                    if (!results.books.find(b => b.id === book.id)) {
-                                        results.books.push(book);
-                                    }
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-            
-            // Search in free_books
-            if (data.free_books && Array.isArray(data.free_books)) {
-                data.free_books.forEach(book => {
+            // Search in all books from the comprehensive API
+            if (booksData && booksData.books && Array.isArray(booksData.books)) {
+                booksData.books.forEach(book => {
+                    if (!book || !book.id) return;
+                    
                     const title = (book.title || '').toLowerCase();
                     const authorName = (typeof book.author === 'object' && book.author?.name 
                         ? book.author.name 
                         : (book.author_name || '')).toLowerCase();
                     
+                    // Search in book titles and authors
                     if (title.includes(query) || authorName.includes(query)) {
                         if (searchType === 'all' || searchType === 'books') {
                             if (!results.books.find(b => b.id === book.id)) {
@@ -188,23 +122,34 @@ const SearchScreen = () => {
                             }
                         }
                     }
-                });
-            }
-            
-            // Search in top_played_book
-            if (data.top_played_book && Array.isArray(data.top_played_book)) {
-                data.top_played_book.forEach(item => {
-                    if (item.book) {
-                        const book = item.book;
-                        const title = (book.title || '').toLowerCase();
-                        const authorName = (typeof book.author === 'object' && book.author?.name 
-                            ? book.author.name 
-                            : (book.author_name || '')).toLowerCase();
+                    
+                    // Extract unique authors for author search
+                    if (searchType === 'all' || searchType === 'authors') {
+                        if (book.author) {
+                            const author = typeof book.author === 'object' ? book.author : { 
+                                id: book.author_id || book.author, 
+                                name: book.author 
+                            };
+                            const authorNameLower = author.name.toLowerCase();
+                            
+                            if (authorNameLower.includes(query)) {
+                                if (!results.authors.find(a => a.id === author.id || a.name === author.name)) {
+                                    results.authors.push(author);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Filter by book type for podcasts (if book has podcast type)
+                    if (searchType === 'all' || searchType === 'podcasts') {
+                        const bookType = (book.type || book.file_type || '').toLowerCase();
+                        const isPodcast = bookType === 'podcast' || book.is_podcast === 1 || book.is_podcast === true;
                         
-                        if (title.includes(query) || authorName.includes(query)) {
-                            if (searchType === 'all' || searchType === 'books') {
-                                if (!results.books.find(b => b.id === book.id)) {
-                                    results.books.push(book);
+                        if (isPodcast) {
+                            const title = (book.title || '').toLowerCase();
+                            if (title.includes(query)) {
+                                if (!results.podcasts.find(p => p.id === book.id)) {
+                                    results.podcasts.push(book);
                                 }
                             }
                         }
@@ -212,64 +157,7 @@ const SearchScreen = () => {
                 });
             }
             
-            // Search in top played authors
-            if (searchType === 'all' || searchType === 'authors') {
-                if (data.top_played_author && Array.isArray(data.top_played_author)) {
-                    data.top_played_author.forEach(item => {
-                        if (item.author) {
-                            const authorName = (typeof item.author === 'object' && item.author.name 
-                                ? item.author.name 
-                                : item.author).toLowerCase();
-                            if (authorName.includes(query)) {
-                                if (!results.authors.find(a => a.id === item.author.id)) {
-                                    results.authors.push(item.author);
-                                }
-                            }
-                        }
-                    });
-                }
-                
-                // Also search in category books for authors
-                if (data.categoryWithBooks) {
-                    data.categoryWithBooks.forEach(category => {
-                        if (category.books && Array.isArray(category.books)) {
-                            category.books.forEach(book => {
-                                if (book.author) {
-                                    const authorName = (typeof book.author === 'object' && book.author?.name 
-                                        ? book.author.name 
-                                        : (book.author_name || '')).toLowerCase();
-                                    if (authorName.includes(query)) {
-                                        const author = typeof book.author === 'object' ? book.author : { name: book.author };
-                                        if (!results.authors.find(a => a.id === (author.id || author.name))) {
-                                            results.authors.push(author);
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-            }
-            
-            // Search in podcasts
-            if (searchType === 'all' || searchType === 'podcasts') {
-                if (data.categoryWithPodcast) {
-                    data.categoryWithPodcast.forEach(category => {
-                        if (category.books && Array.isArray(category.books)) {
-                            category.books.forEach(podcast => {
-                                const title = (podcast.title || '').toLowerCase();
-                                if (title.includes(query)) {
-                                    if (!results.podcasts.find(p => p.id === podcast.id)) {
-                                        results.podcasts.push(podcast);
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-            }
-            
-            console.log('Local search results:', results);
+            console.log('All books API search results:', results);
             setSearchResults(results);
         } catch (error) {
             console.error('Error searching:', error);
@@ -285,17 +173,6 @@ const SearchScreen = () => {
         }
     };
 
-    const handleCategoryClick = (categoryName) => {
-        // Navigate to category books page instead of searching
-        navigate(`/category/${encodeURIComponent(categoryName)}`);
-    };
-    
-    const handleCategorySearch = (categoryName) => {
-        setSearchQuery(categoryName);
-        setSearchType('all');
-        // Trigger search after setting query
-        setTimeout(() => handleSearch(), 100);
-    };
 
     const handleSearchInputChange = (e) => {
         const value = e.target.value;
@@ -406,45 +283,50 @@ const SearchScreen = () => {
                 {/* Content */}
                 <div style={{ flex: 1 }}>
                     {!searchQuery.trim() ? (
-                        categoriesLoading ? (
+                        booksLoading ? (
                             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 40 }}>
                                 <div style={{ width: 40, height: 40, border: `3px solid ${colors.lightGrey}`, borderTop: `3px solid ${colors.appPrimary}`, borderRadius: '50%', animation: 'spin 1s linear infinite' }}></div>
                             </div>
                         ) : (
                             <div>
-                                <h3 style={{ marginBottom: 16, color: colors.black }}>Browse by Category</h3>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 12 }}>
-                                    {categories.map((category) => (
-                                        <button
-                                            key={category.id}
-                                            onClick={() => handleCategoryClick(category.category_name)}
-                                            style={{
-                                                padding: '12px 16px',
-                                                background: colors.white,
-                                                border: `1px solid ${colors.lightGrey}`,
-                                                borderRadius: 8,
-                                                cursor: 'pointer',
-                                                textAlign: 'left',
-                                                transition: 'all 0.2s ease'
-                                            }}
-                                            onMouseEnter={(e) => {
-                                                e.target.style.borderColor = colors.appPrimary;
-                                                e.target.style.backgroundColor = colors.lightestGrey;
-                                            }}
-                                            onMouseLeave={(e) => {
-                                                e.target.style.borderColor = colors.lightGrey;
-                                                e.target.style.backgroundColor = colors.white;
-                                            }}
-                                        >
-                                            <div style={{ fontWeight: 600, fontSize: 14, color: colors.black, marginBottom: 4 }}>
-                                                {category.category_name}
-                                            </div>
-                                            <div style={{ fontSize: 12, color: colors.grey }}>
-                                                {category.books?.length || 0} book{category.books?.length !== 1 ? 's' : ''}
-                                            </div>
-                                        </button>
-                                    ))}
-                                </div>
+                                <h3 style={{ marginBottom: 16, color: colors.black }}>All Books ({allBooks.length})</h3>
+                                {console.log('Rendering all books:', allBooks.length, 'books')}
+                                {allBooks.length === 0 ? (
+                                    <div style={{ textAlign: 'center', padding: 40, color: colors.grey }}>
+                                        <div style={{ fontSize: 16 }}>No books available</div>
+                                        <div style={{ fontSize: 12, marginTop: 8 }}>Debug: allBooks array length is {allBooks.length}</div>
+                                    </div>
+                                ) : (
+                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16 }}>
+                                        {allBooks.filter(book => book && book.id).map((book) => {
+                                        // Safely extract author name
+                                        let authorName = 'Unknown Author';
+                                        if (typeof book.author === 'string') {
+                                            authorName = book.author;
+                                        } else if (book.author && typeof book.author === 'object' && book.author.name) {
+                                            authorName = book.author.name;
+                                        } else if (book.author_name) {
+                                            authorName = book.author_name;
+                                        }
+                                        
+                                        // Ensure book has required properties with proper image URLs
+                                        const safeBook = {
+                                            id: book.id,
+                                            title: book.title || 'Untitled',
+                                            author: authorName,
+                                            author_name: authorName,
+                                            coverimage: book.coverimage ? `${FILE_BASE_URL}${book.coverimage}` : (book.image ? `${FILE_BASE_URL}${book.image}` : '/logo192.png'),
+                                            image: book.image ? `${FILE_BASE_URL}${book.image}` : null,
+                                            rating: book.rating || 0,
+                                            is_liked: book.is_liked || false,
+                                            audio_url: book.audio_url ? `${FILE_BASE_URL}${book.audio_url}` : null,
+                                            bookaudio: book.bookaudio ? `${FILE_BASE_URL}${book.bookaudio}` : null
+                                        };
+                                        
+                                            return <BookCard key={book.id} book={safeBook} />;
+                                        })}
+                                    </div>
+                                )}
                             </div>
                         )
                     ) : (

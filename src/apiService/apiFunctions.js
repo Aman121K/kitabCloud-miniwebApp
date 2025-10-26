@@ -670,5 +670,55 @@ export const apiFunctions = {
             console.log('Error submitting feedback:', error);
             return { error: error.message };
         }
+    },
+    getAllBooks: async (token) => {
+        try {
+            const res = await axios.get(BASE_URL + 'books', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log('All books fetched:', res.data);
+            return res.data;
+        } catch (error) {
+            console.error('Error fetching all books:', error);
+            return { error: error.message };
+        }
+    },
+    getAudiobooksByCategory: async (token, categoryId) => {
+        try {
+            const res = await axios.get(BASE_URL + `audio?category_id=${categoryId}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log('Audiobooks by category fetched:', res.data);
+            // Flatten the nested structure - books array contains audiobooks in each category
+            const allAudiobooks = (res.data.categoryWithAudioBooks || []).flatMap(
+                category => category.books || []
+            );
+            return allAudiobooks;
+        } catch (error) {
+            console.error('Error fetching audiobooks by category:', error);
+            return [];
+        }
+    },
+    searchAudiobooks: async (token, query) => {
+        try {
+            const res = await axios.get(BASE_URL + `audio?search=${encodeURIComponent(query)}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            console.log('Search audiobooks results:', res.data);
+            // Flatten the nested structure - books array contains audiobooks in each category
+            const allAudiobooks = (res.data.categoryWithAudioBooks || []).flatMap(
+                category => category.books || []
+            );
+            return allAudiobooks;
+        } catch (error) {
+            console.error('Error searching audiobooks:', error);
+            return [];
+        }
     }
 } 

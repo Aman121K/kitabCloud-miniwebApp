@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { apiFunctions } from '../../apiService/apiFunctions';
 import BookCard from '../BookCard';
-import { colors } from '../../constants/colors';
 
 const AllTabComponent = ({ homeData }) => {
-  const { token } = useAuth();
   const navigate = useNavigate();
   const [comingSoonIndex, setComingSoonIndex] = useState(0);
 
@@ -40,7 +36,19 @@ const AllTabComponent = ({ homeData }) => {
     const fileUrl = ad.file ? `${FILE_BASE_URL}${ad.file}` : '';
     const handleClick = () => {
       if (ad.redirect_url) {
-        window.open(ad.redirect_url.startsWith('http') ? ad.redirect_url : `https://${ad.redirect_url}`, '_blank');
+        try {
+          const url = ad.redirect_url.startsWith('http') ? ad.redirect_url : `https://${ad.redirect_url}`;
+          const link = window.open(url, '_blank');
+          
+          // If popup blocked, redirect current window
+          if (!link || link.closed || typeof link.closed === 'undefined') {
+            window.location.href = url;
+          }
+        } catch (error) {
+          // Fallback: redirect current window
+          const url = ad.redirect_url.startsWith('http') ? ad.redirect_url : `https://${ad.redirect_url}`;
+          window.location.href = url;
+        }
       }
     };
     return (
@@ -424,6 +432,90 @@ const AllTabComponent = ({ homeData }) => {
     );
   };
 
+  // Categories with Books Section
+  const CategoriesWithBooksSection = () => {
+    const categories = homeData?.categoryWithBooks || [];
+    
+    if (!categories.length) return null;
+
+    return (
+      <div style={{ margin: '32px 0 0 0' }}>
+        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 16 }}>Categories</div>
+        {categories.map((category, categoryIndex) => {
+          const books = category.books || [];
+          if (!books.length) return null;
+
+          return (
+            <div key={category.id || categoryIndex} style={{ marginBottom: 32 }}>
+              {/* Category Header */}
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center', 
+                marginBottom: 12 
+              }}>
+                <div style={{ 
+                  fontWeight: 600, 
+                  fontSize: 16,
+                  color: '#333'
+                }}>
+                  {category.name || category.category_name || 'Unnamed Category'}
+                </div>
+                <button
+                  style={{ 
+                    background: 'none', 
+                    border: 'none', 
+                    color: '#e7440d', 
+                    fontWeight: 500, 
+                    fontSize: 14, 
+                    cursor: 'pointer' 
+                  }}
+                  onClick={() => navigate(`/category/${category.name || category.category_name || 'unknown'}`)}
+                >
+                  See All
+                </button>
+              </div>
+              
+              {/* Books Grid */}
+              <div style={{ 
+                display: 'flex', 
+                gap: 16, 
+                overflowX: 'auto', 
+                paddingBottom: 8,
+                WebkitOverflowScrolling: 'touch',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
+              }}>
+                {books.map((book) => {
+                  const authorName = getAuthorName(book.author, book.author_name);
+                  const safeBook = {
+                    id: book.id,
+                    title: book.title || 'Untitled',
+                    author: authorName,
+                    author_name: authorName,
+                    coverimage: getImageUrl(book.coverimage, book.image),
+                    image: book.image ? `${FILE_BASE_URL}${book.image}` : book.image,
+                    rating: book.rating || 0,
+                    is_liked: book.is_liked || false,
+                    audio_url: book.audio_url,
+                    bookaudio: book.bookaudio ? `${FILE_BASE_URL}${book.bookaudio}` : book.bookaudio,
+                    bookfile: book.bookfile ? `${FILE_BASE_URL}${book.bookfile}` : book.bookfile
+                  };
+                  
+                  return (
+                    <div key={book.id} style={{ minWidth: 160, maxWidth: 180 }}>
+                      <BookCard book={safeBook} />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
   // Coming Soon Section
   const ComingSoonSection = () => {
     const comingSoonItems = homeData.coming_soon || [];
@@ -704,8 +796,19 @@ const AllTabComponent = ({ homeData }) => {
             
             const handleClick = () => {
               if (youtubeUrl) {
-                const url = youtubeUrl.startsWith('http') ? youtubeUrl : `https://${youtubeUrl}`;
-                window.open(url, '_blank');
+                try {
+                  const url = youtubeUrl.startsWith('http') ? youtubeUrl : `https://${youtubeUrl}`;
+                  const link = window.open(url, '_blank');
+                  
+                  // If popup blocked, redirect current window
+                  if (!link || link.closed || typeof link.closed === 'undefined') {
+                    window.location.href = url;
+                  }
+                } catch (error) {
+                  // Fallback: redirect current window
+                  const url = youtubeUrl.startsWith('http') ? youtubeUrl : `https://${youtubeUrl}`;
+                  window.location.href = url;
+                }
               }
             };
             
@@ -800,38 +903,37 @@ const AllTabComponent = ({ homeData }) => {
             // Get author name safely
             const authorName = getAuthorName(book.author, book.author_name);
             
-            // Get image URL
-            const imageUrl = getImageUrl(book.coverimage, book.image);
+            // Prepare book data for BookCard component
+            const coverImageUrl = book.coverimage ? `${FILE_BASE_URL}${book.coverimage}` : (book.image ? `${FILE_BASE_URL}${book.image}` : '/logo192.png');
+            const imageUrl = book.image ? `${FILE_BASE_URL}${book.image}` : book.image;
             
-            const handleClick = () => {
-              navigate(`/book/${bookId}`);
+            console.log('TopBooks - Book data:', {
+              id: bookId,
+              title: book.title,
+              coverimage: book.coverimage,
+              image: book.image,
+              coverImageUrl: coverImageUrl,
+              imageUrl: imageUrl
+            });
+            
+            const bookData = {
+              id: bookId,
+              title: book.title || 'Untitled',
+              author: authorName,
+              author_name: book.author_name || authorName,
+              coverimage: coverImageUrl,
+              image: imageUrl,
+              rating: book.rating || 0,
+              is_liked: book.is_liked || false,
+              audio_url: book.audio_url,
+              bookaudio: book.bookaudio ? `${FILE_BASE_URL}${book.bookaudio}` : book.bookaudio
             };
             
             return (
-              <div 
+              <BookCard 
                 key={bookId} 
-                style={{ cursor: 'pointer' }}
-                onClick={handleClick}
-              >
-                <img
-                  src={imageUrl}
-                  alt={book.title}
-                  style={{ 
-                    width: '100%', 
-                    height: 240, 
-                    borderRadius: 8, 
-                    objectFit: 'cover',
-                    marginBottom: 8
-                  }}
-                  onError={(e) => {
-                    e.target.src = '/logo192.png';
-                  }}
-                />
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>
-                  {book.title || 'Untitled'}
-                </div>
-                <div style={{ fontSize: 12, color: '#666' }}>by {authorName}</div>
-              </div>
+                book={bookData}
+              />
             );
           })}
         </div>
@@ -867,8 +969,19 @@ const AllTabComponent = ({ homeData }) => {
             
             const handleClick = () => {
               if (youtubeUrl) {
-                const url = youtubeUrl.startsWith('http') ? youtubeUrl : `https://${youtubeUrl}`;
-                window.open(url, '_blank');
+                try {
+                  const url = youtubeUrl.startsWith('http') ? youtubeUrl : `https://${youtubeUrl}`;
+                  const link = window.open(url, '_blank');
+                  
+                  // If popup blocked, redirect current window
+                  if (!link || link.closed || typeof link.closed === 'undefined') {
+                    window.location.href = url;
+                  }
+                } catch (error) {
+                  // Fallback: redirect current window
+                  const url = youtubeUrl.startsWith('http') ? youtubeUrl : `https://${youtubeUrl}`;
+                  window.location.href = url;
+                }
               }
             };
             
@@ -961,6 +1074,7 @@ const AllTabComponent = ({ homeData }) => {
       <PodcastsSection />
       <VideosSection />
       <ComingSoonSection />
+      <CategoriesWithBooksSection />
     </div>
   );
 };

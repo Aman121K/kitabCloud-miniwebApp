@@ -24,6 +24,12 @@ export const DataProvider = ({ children }) => {
     const [likedBooksError, setLikedBooksError] = useState(null);
     const [likedBooksTimestamp, setLikedBooksTimestamp] = useState(null);
 
+    // Cache for all books
+    const [allBooks, setAllBooks] = useState(null);
+    const [allBooksLoading, setAllBooksLoading] = useState(false);
+    const [allBooksError, setAllBooksError] = useState(null);
+    const [allBooksTimestamp, setAllBooksTimestamp] = useState(null);
+
     // Cache expiration time (5 minutes)
     const CACHE_EXPIRATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
@@ -114,8 +120,11 @@ export const DataProvider = ({ children }) => {
         setHomeDataTimestamp(null);
         setLikedBooks(null);
         setLikedBooksTimestamp(null);
+        setAllBooks(null);
+        setAllBooksTimestamp(null);
         setHomeDataError(null);
         setLikedBooksError(null);
+        setAllBooksError(null);
         console.log('Cache cleared');
     }, []);
 
@@ -134,6 +143,13 @@ export const DataProvider = ({ children }) => {
         console.log('Liked books cache cleared');
     }, []);
 
+    const clearAllBooksCache = useCallback(() => {
+        setAllBooks(null);
+        setAllBooksTimestamp(null);
+        setAllBooksError(null);
+        console.log('All books cache cleared');
+    }, []);
+
     // Refresh home data (force fetch)
     const refreshHomeData = useCallback(async (token) => {
         return await fetchHomeData(token, true);
@@ -143,6 +159,48 @@ export const DataProvider = ({ children }) => {
     const refreshLikedBooks = useCallback(async (token) => {
         return await fetchLikedBooks(token, true);
     }, [fetchLikedBooks]);
+
+    // Fetch all books with caching
+    const fetchAllBooks = useCallback(async (token, forceRefresh = false) => {
+        // If we have valid cached data and not forcing refresh, return cached data
+        if (!forceRefresh && allBooks && isCacheValid(allBooksTimestamp)) {
+            console.log('Using cached all books');
+            return allBooks;
+        }
+
+        // Otherwise, fetch fresh data
+        setAllBooksLoading(true);
+        setAllBooksError(null);
+
+        try {
+            const data = await apiFunctions.getAllBooks(token);
+            const now = Date.now();
+            
+            setAllBooks(data);
+            setAllBooksTimestamp(now);
+            console.log('Fetched fresh all books');
+            
+            return data;
+        } catch (error) {
+            console.error('Error fetching all books:', error);
+            setAllBooksError(error);
+            
+            // Return cached data if available, even if expired
+            if (allBooks) {
+                console.log('Returning expired cached all books due to error');
+                return allBooks;
+            }
+            
+            throw error;
+        } finally {
+            setAllBooksLoading(false);
+        }
+    }, [allBooks, allBooksTimestamp]);
+
+    // Refresh all books (force fetch)
+    const refreshAllBooks = useCallback(async (token) => {
+        return await fetchAllBooks(token, true);
+    }, [fetchAllBooks]);
 
     const value = {
         // Home data
@@ -160,6 +218,14 @@ export const DataProvider = ({ children }) => {
         fetchLikedBooks,
         refreshLikedBooks,
         clearLikedBooksCache,
+
+        // All books
+        allBooks,
+        allBooksLoading,
+        allBooksError,
+        fetchAllBooks,
+        refreshAllBooks,
+        clearAllBooksCache,
 
         // General cache management
         clearCache

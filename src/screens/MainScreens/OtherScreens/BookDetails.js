@@ -225,7 +225,27 @@ const BookDetails = () => {
     
     // Get book length from API - can be from book_length or length field
     // If not available, don't show "N/A" - just hide the field if not applicable
-    const length = book.book_length || book.length || null;
+    const lengthInSeconds = book.book_length || book.length || null;
+    
+    // Function to format length from seconds to hours and minutes
+    const formatLength = (seconds) => {
+        if (!seconds || isNaN(seconds)) return null;
+        
+        const totalSeconds = parseInt(seconds);
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const remainingSeconds = totalSeconds % 60;
+        
+        if (hours > 0) {
+            return `${hours}h ${minutes}m`;
+        } else if (minutes > 0) {
+            return `${minutes}m ${remainingSeconds}s`;
+        } else {
+            return `${remainingSeconds}s`;
+        }
+    };
+    
+    const length = formatLength(lengthInSeconds);
     
     const rating = parseFloat(book.average_rating) || book.rating || 0;
 
@@ -301,7 +321,20 @@ const BookDetails = () => {
                             )}
                             {book.bookfile && (
                                 <button
-                                    onClick={() => window.open(FILE_BASE_URL + book.bookfile, '_blank')}
+                                    onClick={() => {
+                                        try {
+                                            // Try opening in new window first
+                                            const link = window.open(FILE_BASE_URL + book.bookfile, '_blank');
+                                            
+                                            // If that fails (e.g., blocked by iframe), redirect current window
+                                            if (!link || link.closed || typeof link.closed === 'undefined') {
+                                                window.location.href = FILE_BASE_URL + book.bookfile;
+                                            }
+                                        } catch (error) {
+                                            // Fallback: redirect current window
+                                            window.location.href = FILE_BASE_URL + book.bookfile;
+                                        }
+                                    }}
                                     style={{
                                         padding: '8px 16px',
                                         backgroundColor: colors.white,

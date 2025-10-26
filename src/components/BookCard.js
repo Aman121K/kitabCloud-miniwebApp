@@ -118,7 +118,22 @@ const BookCard = ({ book }) => {
     // Safely get book properties
     const bookTitle = getSafeString(book.title);
     const bookAuthor = getSafeString(book.author?.name || book.author_name || book.author);
-    const bookImage = book.coverimage || book.image || '/dummy-book.png';
+    
+    // Handle image URL properly
+    let bookImage = '/logo192.png'; // Default fallback
+    if (book.coverimage) {
+        bookImage = book.coverimage.startsWith('http') ? book.coverimage : book.coverimage;
+    } else if (book.image) {
+        bookImage = book.image.startsWith('http') ? book.image : book.image;
+    }
+    
+    console.log('BookCard - Image handling:', {
+        title: bookTitle,
+        coverimage: book.coverimage,
+        image: book.image,
+        finalImage: bookImage
+    });
+    
     const bookRating = typeof book.rating === 'number' ? book.rating : 0;
 
     // Prepare track data for context
