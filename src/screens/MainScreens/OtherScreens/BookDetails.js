@@ -189,11 +189,12 @@ const BookDetails = () => {
                             backgroundColor: colors.appPrimary,
                             color: colors.white,
                             border: 'none',
-                            borderRadius: 6,
-                            cursor: 'pointer'
+                            borderRadius: 8,
+                            cursor: 'pointer',
+                            fontWeight: 600
                         }}
                     >
-                        Go Back
+                        ← Go Back
                     </button>
                 </div>
             </div>
@@ -215,10 +216,18 @@ const BookDetails = () => {
     const publisher = typeof book.publisher === 'string' 
         ? book.publisher 
         : (book.publisher?.name || 'Kitab Cloud originals');
-    const releaseDate = formatDate(book.created_at) || '01 Jan 2023';
-    const language = book.language || 'Somali';
-    const length = book.length || '2 hr 22 min';
-    const rating = book.rating || 0;
+    const releaseDate = formatDate(book.created_at) || formatDate(new Date());
+    
+    // Get language from API response - can be from language object or language_id
+    const language = book.language?.name || 
+                     book.category?.category_name || 
+                     'Somali'; // Fallback to 'Somali' if not available
+    
+    // Get book length from API - can be from book_length or length field
+    // If not available, don't show "N/A" - just hide the field if not applicable
+    const length = book.book_length || book.length || null;
+    
+    const rating = parseFloat(book.average_rating) || book.rating || 0;
 
     // Description logic
     const descLimit = 120;
@@ -323,13 +332,21 @@ const BookDetails = () => {
                             <p style={{ fontSize: 14, margin: 0 }}>{releaseDate}</p>
                         </div>
                         <div>
-                            <span style={{ fontSize: 12, color: colors.grey }}>Language</span>
-                            <p style={{ fontSize: 14, margin: 0 }}>{language}</p>
+                            <span style={{ fontSize: 12, color: colors.grey }}>Category</span>
+                            <p style={{ fontSize: 14, margin: 0 }}>{book.category?.category_name || 'N/A'}</p>
                         </div>
-                        <div>
-                            <span style={{ fontSize: 12, color: colors.grey }}>Length</span>
-                            <p style={{ fontSize: 14, margin: 0 }}>{length}</p>
-                        </div>
+                        {length && (
+                            <div>
+                                <span style={{ fontSize: 12, color: colors.grey }}>Length</span>
+                                <p style={{ fontSize: 14, margin: 0 }}>{length}</p>
+                            </div>
+                        )}
+                        {!length && (
+                            <div>
+                                <span style={{ fontSize: 12, color: colors.grey }}>Type</span>
+                                <p style={{ fontSize: 14, margin: 0 }}>{book.type || book.file_type || 'N/A'}</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 

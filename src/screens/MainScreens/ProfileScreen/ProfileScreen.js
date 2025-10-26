@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import { useData } from '../../../context/DataContext';
 import { apiFunctions } from '../../../apiService/apiFunctions';
 import { colors } from '../../../constants/colors';
 import { commonStyles } from '../../../constants/commonStyles';
@@ -11,16 +12,30 @@ const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 
 const ProfileScreen = () => {
     const { user, token, logout } = useAuth();
+    const { likedBooks: cachedLikedBooks, fetchLikedBooks: fetchCachedLikedBooks } = useData();
     const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
-    const [likedBooks, setLikedBooks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('profile'); // 'profile' or 'liked'
+
+    // Extract liked books from cached data
+    const likedBooks = useMemo(() => {
+        if (!cachedLikedBooks || !Array.isArray(cachedLikedBooks) || cachedLikedBooks.length === 0) {
+            return [];
+        }
+        
+        // Response structure: cachedLikedBooks[0].booklike is an array of { id, book: {...} }
+        const booklikeArray = cachedLikedBooks[0]?.booklike || [];
+        return booklikeArray.map(item => item.book).filter(Boolean);
+    }, [cachedLikedBooks]);
 
     useEffect(() => {
         if (token) {
             fetchUserData();
-            fetchLikedBooks();
+            // Only fetch if we don't have cached data
+            if (!cachedLikedBooks) {
+                fetchCachedLikedBooks(token);
+            }
         }
     }, [token]);
 
@@ -32,23 +47,6 @@ const ProfileScreen = () => {
             console.error('Error fetching user data:', error);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const fetchLikedBooks = async () => {
-        try {
-            const response = await apiFunctions.getUserLikedBooks(token);
-            
-            // Response structure: response[0].booklike is an array of { id, book: {...} }
-            // We need to extract the book objects
-            const booklikeArray = response[0]?.booklike || [];
-            const books = booklikeArray.map(item => item.book).filter(Boolean);
-            
-            console.log('Liked books data:', books);
-            setLikedBooks(books);
-        } catch (error) {
-            console.error('Error fetching liked books:', error);
-            setLikedBooks([]);
         }
     };
 

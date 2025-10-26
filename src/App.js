@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { AudioPlayerProvider } from './context/AudioPlayerContext';
+import { DataProvider } from './context/DataContext';
 import Login from './screens/AuthScreens/Login';
 import Signup from './screens/AuthScreens/Signup';
 import ForgotPassword from './screens/AuthScreens/ForgotPassword';
@@ -19,6 +20,7 @@ import AllAudiobooksPage from './screens/MainScreens/OtherScreens/AllAudiobooksP
 import AllVideosPage from './screens/MainScreens/OtherScreens/AllVideosPage';
 import AllMagazinesPage from './screens/MainScreens/OtherScreens/AllMagazinesPage';
 import AllPodcastsPage from './screens/MainScreens/OtherScreens/AllPodcastsPage';
+import CategoryBooksPage from './screens/MainScreens/OtherScreens/CategoryBooksPage';
 import PlayerScreen from './screens/MainScreens/PlayerScreen/PlayerScreen';
 import FeedbackScreen from './screens/MainScreens/OtherScreens/FeedbackScreen';
 import AudioPlayer from './components/AudioPlayer/AudioPlayer';
@@ -116,6 +118,11 @@ const AppContent = () => {
                         <BookDetails />
                     </ProtectedRoute>
                 } />
+                <Route path="/category/:categoryName" element={
+                    <ProtectedRoute>
+                        <CategoryBooksPage />
+                    </ProtectedRoute>
+                } />
                 <Route path="/all-books" element={
                     <ProtectedRoute>
                         <AllBooksPage />
@@ -166,9 +173,11 @@ const AppContent = () => {
 const App = () => {
     return (
         <AuthProvider>
-            <AudioPlayerProvider>
-                <AppContent />
-            </AudioPlayerProvider>
+            <DataProvider>
+                <AudioPlayerProvider>
+                    <AppContent />
+                </AudioPlayerProvider>
+            </DataProvider>
         </AuthProvider>
     );
 };

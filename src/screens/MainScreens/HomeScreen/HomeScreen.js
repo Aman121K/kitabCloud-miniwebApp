@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../../context/AuthContext';
+import { useData } from '../../../context/DataContext';
 import { apiFunctions } from '../../../apiService/apiFunctions';
 import FilterBar from '../../../components/HomescreenComponents/FilterBar';
 import AllTabComponent from '../../../components/HomeTabComponents/AllTabComponent';
@@ -15,8 +16,8 @@ const FilterData = ['All', 'Audiobooks', 'Ebooks', 'Videos', 'Magazines', 'Podca
 
 const HomeScreen = () => {
   const { token } = useAuth();
+  const { homeData, homeDataLoading, fetchHomeData } = useData();
   const [userData, setUserData] = useState(null);
-  const [homeData, setHomeData] = useState(null);
   const [selectedFilterTab, setSelectedFilterTab] = useState(FilterData[0]);
   const [loading, setLoading] = useState(true);
 
@@ -30,14 +31,13 @@ const HomeScreen = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch both user data and home data
+      // Fetch both user data and home data (home data will use cache)
       const [userRes, homeRes] = await Promise.all([
         apiFunctions.getUserData(token),
-        apiFunctions.getHomeData(token)
+        fetchHomeData(token)
       ]);
       
       setUserData(userRes);
-      setHomeData(homeRes);
       console.log('Home data received:', homeRes);
       console.log('Category with books:', homeRes?.categoryWithBooks?.length || 0);
       console.log('Authors:', homeRes?.author?.length || 0);
@@ -48,7 +48,6 @@ const HomeScreen = () => {
     } catch (error) {
       console.error('Error fetching data:', error);
       setUserData(null);
-      setHomeData(null);
     } finally {
       setLoading(false);
     }

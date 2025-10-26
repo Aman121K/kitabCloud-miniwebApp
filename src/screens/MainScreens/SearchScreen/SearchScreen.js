@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { apiFunctions } from '../../../apiService/apiFunctions';
+import { useData } from '../../../context/DataContext';
 import { colors } from '../../../constants/colors';
 import { commonStyles } from '../../../constants/commonStyles';
 import BookCard from '../../../components/BookCard';
@@ -9,9 +9,13 @@ import BottomNavigation from '../../../components/BottomNavigation';
 import AuthorCard from '../../../components/AuthorCard';
 import PodcastCard from '../../../components/PodcastCard';
 
+const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
+
 const SearchScreen = () => {
     const { token } = useAuth();
+    const { homeData, fetchHomeData } = useData();
     const location = useLocation();
+    const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState({});
     const [loading, setLoading] = useState(false);
@@ -30,8 +34,11 @@ const SearchScreen = () => {
     const fetchCategories = async () => {
         setCategoriesLoading(true);
         try {
-            const data = await apiFunctions.getCategories(token);
-            setCategories(data || []);
+            // Use cached home data if available, otherwise fetch
+            const data = homeData || await fetchHomeData(token);
+            console.log('Home data for categories:', data);
+            // Use categoryWithBooks from home data
+            setCategories(data?.categoryWithBooks || []);
         } catch (error) {
             console.error('Error fetching categories:', error);
             setCategories([]);
@@ -44,17 +51,226 @@ const SearchScreen = () => {
 
         try {
             setLoading(true);
-            const searchParams = { query: searchQuery };
             
-            // Add search type if specified
-            if (searchType && searchType !== 'all') {
-                searchParams.type = searchType;
+            // Use cached home data instead of API
+            const data = homeData || await fetchHomeData(token);
+            const query = searchQuery.toLowerCase().trim();
+            
+            // Perform local search across all data
+            const results = {
+                books: [],
+                authors: [],
+                podcasts: []
+            };
+            
+            // Search in all books from categoryWithBooks
+            if (data.categoryWithBooks) {
+                data.categoryWithBooks.forEach(category => {
+                    if (category.books && Array.isArray(category.books)) {
+                        category.books.forEach(book => {
+                            const title = (book.title || '').toLowerCase();
+                            const authorName = (typeof book.author === 'object' && book.author?.name 
+                                ? book.author.name 
+                                : (book.author_name || '')).toLowerCase();
+                            
+                            if (title.includes(query) || authorName.includes(query)) {
+                                if (searchType === 'all' || searchType === 'books') {
+                                    if (!results.books.find(b => b.id === book.id)) {
+                                        results.books.push(book);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
             }
             
-            console.log('Searching with params:', searchParams);
-            const data = await apiFunctions.searchItems(searchParams, token);
-            console.log('Search results:', data);
-            setSearchResults(data || {});
+            // Search in categoryWithAudioBooks (audiobooks)
+            if (data.categoryWithAudioBooks) {
+                data.categoryWithAudioBooks.forEach(category => {
+                    if (category.books && Array.isArray(category.books)) {
+                        category.books.forEach(book => {
+                            const title = (book.title || '').toLowerCase();
+                            const authorName = (typeof book.author === 'object' && book.author?.name 
+                                ? book.author.name 
+                                : (book.author_name || '')).toLowerCase();
+                            
+                            if (title.includes(query) || authorName.includes(query)) {
+                                if (searchType === 'all' || searchType === 'books') {
+                                    if (!results.books.find(b => b.id === book.id)) {
+                                        results.books.push(book);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // Search in categoryWithEBooks (ebooks)
+            if (data.categoryWithEBooks) {
+                data.categoryWithEBooks.forEach(category => {
+                    if (category.books && Array.isArray(category.books)) {
+                        category.books.forEach(book => {
+                            const title = (book.title || '').toLowerCase();
+                            const authorName = (typeof book.author === 'object' && book.author?.name 
+                                ? book.author.name 
+                                : (book.author_name || '')).toLowerCase();
+                            
+                            if (title.includes(query) || authorName.includes(query)) {
+                                if (searchType === 'all' || searchType === 'books') {
+                                    if (!results.books.find(b => b.id === book.id)) {
+                                        results.books.push(book);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // Search in categoryWithMagazines (magazines)
+            if (data.categoryWithMagazines) {
+                data.categoryWithMagazines.forEach(category => {
+                    if (category.books && Array.isArray(category.books)) {
+                        category.books.forEach(book => {
+                            const title = (book.title || '').toLowerCase();
+                            const authorName = (typeof book.author === 'object' && book.author?.name 
+                                ? book.author.name 
+                                : (book.author_name || '')).toLowerCase();
+                            
+                            if (title.includes(query) || authorName.includes(query)) {
+                                if (searchType === 'all' || searchType === 'books') {
+                                    if (!results.books.find(b => b.id === book.id)) {
+                                        results.books.push(book);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // Search in categoryWithVideos (videos)
+            if (data.categoryWithVideos) {
+                data.categoryWithVideos.forEach(category => {
+                    if (category.books && Array.isArray(category.books)) {
+                        category.books.forEach(book => {
+                            const title = (book.title || '').toLowerCase();
+                            const authorName = (typeof book.author === 'object' && book.author?.name 
+                                ? book.author.name 
+                                : (book.author_name || '')).toLowerCase();
+                            
+                            if (title.includes(query) || authorName.includes(query)) {
+                                if (searchType === 'all' || searchType === 'books') {
+                                    if (!results.books.find(b => b.id === book.id)) {
+                                        results.books.push(book);
+                                    }
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+            
+            // Search in free_books
+            if (data.free_books && Array.isArray(data.free_books)) {
+                data.free_books.forEach(book => {
+                    const title = (book.title || '').toLowerCase();
+                    const authorName = (typeof book.author === 'object' && book.author?.name 
+                        ? book.author.name 
+                        : (book.author_name || '')).toLowerCase();
+                    
+                    if (title.includes(query) || authorName.includes(query)) {
+                        if (searchType === 'all' || searchType === 'books') {
+                            if (!results.books.find(b => b.id === book.id)) {
+                                results.books.push(book);
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Search in top_played_book
+            if (data.top_played_book && Array.isArray(data.top_played_book)) {
+                data.top_played_book.forEach(item => {
+                    if (item.book) {
+                        const book = item.book;
+                        const title = (book.title || '').toLowerCase();
+                        const authorName = (typeof book.author === 'object' && book.author?.name 
+                            ? book.author.name 
+                            : (book.author_name || '')).toLowerCase();
+                        
+                        if (title.includes(query) || authorName.includes(query)) {
+                            if (searchType === 'all' || searchType === 'books') {
+                                if (!results.books.find(b => b.id === book.id)) {
+                                    results.books.push(book);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            // Search in top played authors
+            if (searchType === 'all' || searchType === 'authors') {
+                if (data.top_played_author && Array.isArray(data.top_played_author)) {
+                    data.top_played_author.forEach(item => {
+                        if (item.author) {
+                            const authorName = (typeof item.author === 'object' && item.author.name 
+                                ? item.author.name 
+                                : item.author).toLowerCase();
+                            if (authorName.includes(query)) {
+                                if (!results.authors.find(a => a.id === item.author.id)) {
+                                    results.authors.push(item.author);
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Also search in category books for authors
+                if (data.categoryWithBooks) {
+                    data.categoryWithBooks.forEach(category => {
+                        if (category.books && Array.isArray(category.books)) {
+                            category.books.forEach(book => {
+                                if (book.author) {
+                                    const authorName = (typeof book.author === 'object' && book.author?.name 
+                                        ? book.author.name 
+                                        : (book.author_name || '')).toLowerCase();
+                                    if (authorName.includes(query)) {
+                                        const author = typeof book.author === 'object' ? book.author : { name: book.author };
+                                        if (!results.authors.find(a => a.id === (author.id || author.name))) {
+                                            results.authors.push(author);
+                                        }
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+            
+            // Search in podcasts
+            if (searchType === 'all' || searchType === 'podcasts') {
+                if (data.categoryWithPodcast) {
+                    data.categoryWithPodcast.forEach(category => {
+                        if (category.books && Array.isArray(category.books)) {
+                            category.books.forEach(podcast => {
+                                const title = (podcast.title || '').toLowerCase();
+                                if (title.includes(query)) {
+                                    if (!results.podcasts.find(p => p.id === podcast.id)) {
+                                        results.podcasts.push(podcast);
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+            
+            console.log('Local search results:', results);
+            setSearchResults(results);
         } catch (error) {
             console.error('Error searching:', error);
             setSearchResults({});
@@ -69,6 +285,11 @@ const SearchScreen = () => {
         }
     };
 
+    const handleCategoryClick = (categoryName) => {
+        // Navigate to category books page instead of searching
+        navigate(`/category/${encodeURIComponent(categoryName)}`);
+    };
+    
     const handleCategorySearch = (categoryName) => {
         setSearchQuery(categoryName);
         setSearchType('all');
@@ -85,14 +306,17 @@ const SearchScreen = () => {
             clearTimeout(searchTimeout);
         }
         
-        // Auto-search after 500ms of no typing
+        // Auto-search after 300ms of no typing (reduced from 500ms for better UX)
         if (value.trim()) {
+            // Set loading state immediately while waiting for search
+            setLoading(true);
             const timeout = setTimeout(() => {
                 handleSearch();
-            }, 500);
+            }, 300);
             setSearchTimeout(timeout);
         } else {
             setSearchResults({});
+            setLoading(false);
         }
     };
 
@@ -193,7 +417,7 @@ const SearchScreen = () => {
                                     {categories.map((category) => (
                                         <button
                                             key={category.id}
-                                            onClick={() => handleCategorySearch(category.category_name)}
+                                            onClick={() => handleCategoryClick(category.category_name)}
                                             style={{
                                                 padding: '12px 16px',
                                                 background: colors.white,
@@ -216,7 +440,7 @@ const SearchScreen = () => {
                                                 {category.category_name}
                                             </div>
                                             <div style={{ fontSize: 12, color: colors.grey }}>
-                                                {category.books?.length || 0} items
+                                                {category.books?.length || 0} book{category.books?.length !== 1 ? 's' : ''}
                                             </div>
                                         </button>
                                     ))}
@@ -236,18 +460,28 @@ const SearchScreen = () => {
                                         <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 10 }}>Books ({searchResults.books.length})</div>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 16 }}>
                                             {searchResults.books.filter(book => book && book.id).map((item, idx) => {
-                                                // Ensure book has required properties
+                                                // Safely extract author name
+                                                let authorName = 'Unknown Author';
+                                                if (typeof item.author === 'string') {
+                                                    authorName = item.author;
+                                                } else if (item.author && typeof item.author === 'object' && item.author.name) {
+                                                    authorName = item.author.name;
+                                                } else if (item.author_name) {
+                                                    authorName = item.author_name;
+                                                }
+                                                
+                                                // Ensure book has required properties with proper image URLs
                                                 const safeBook = {
                                                     id: item.id,
                                                     title: item.title || 'Untitled',
-                                                    author: item.author || { name: 'Unknown Author' },
-                                                    author_name: item.author_name || 'Unknown Author',
-                                                    coverimage: item.coverimage || item.image,
-                                                    image: item.image,
+                                                    author: authorName,
+                                                    author_name: authorName,
+                                                    coverimage: item.coverimage ? `${FILE_BASE_URL}${item.coverimage}` : (item.image ? `${FILE_BASE_URL}${item.image}` : '/logo192.png'),
+                                                    image: item.image ? `${FILE_BASE_URL}${item.image}` : null,
                                                     rating: item.rating || 0,
                                                     is_liked: item.is_liked || false,
-                                                    audio_url: item.audio_url,
-                                                    bookaudio: item.bookaudio
+                                                    audio_url: item.audio_url ? `${FILE_BASE_URL}${item.audio_url}` : null,
+                                                    bookaudio: item.bookaudio ? `${FILE_BASE_URL}${item.bookaudio}` : null
                                                 };
                                                 
                                                 return <BookCard key={item.id || idx} book={safeBook} />;
@@ -296,23 +530,6 @@ const SearchScreen = () => {
                                     </div>
                                 ) : searchQuery.trim() && searchType !== 'books' && searchType !== 'authors' && (
                                     <div style={{ height: 80, background: '#f5f5f5', borderRadius: 10, marginBottom: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#bbb', fontSize: 16 }}>No podcasts found</div>
-                                )}
-
-                                {/* Debug Info (remove in production) */}
-                                {process.env.NODE_ENV === 'development' && searchQuery.trim() && (
-                                    <div style={{ 
-                                        background: '#f0f0f0', 
-                                        padding: 16, 
-                                        borderRadius: 8, 
-                                        marginTop: 20,
-                                        fontSize: 12,
-                                        fontFamily: 'monospace'
-                                    }}>
-                                        <div><strong>Debug Info:</strong></div>
-                                        <div>Query: "{searchQuery}"</div>
-                                        <div>Type: {searchType}</div>
-                                        <div>Results: {JSON.stringify(searchResults, null, 2)}</div>
-                                    </div>
                                 )}
 
                                 {/* No Results */}

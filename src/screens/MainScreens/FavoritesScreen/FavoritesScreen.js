@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import { useData } from '../../../context/DataContext';
 import { apiFunctions } from '../../../apiService/apiFunctions';
 import { colors } from '../../../constants/colors';
 import BookCard from '../../../components/BookCard';
@@ -11,6 +12,7 @@ const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 
 const FavoritesScreen = () => {
     const { token } = useAuth();
+    const { fetchLikedBooks } = useData();
     const navigate = useNavigate();
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -26,8 +28,8 @@ const FavoritesScreen = () => {
         try {
             setLoading(true);
             setError(false);
-            // Fetch liked books directly from API
-            const response = await apiFunctions.getUserLikedBooks(token);
+            // Fetch liked books using cached data
+            const response = await fetchLikedBooks(token);
             
             // Response structure: response[0].booklike is an array of { id, book: {...} }
             // We need to extract the book objects

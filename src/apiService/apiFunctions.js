@@ -160,7 +160,22 @@ export const apiFunctions = {
                 }
             })
             console.log('Search response:', res.data);
-            return res.data.data || res.data || { books: [], authors: [], podcasts: [] };
+            
+            // Extract data from response
+            const data = res.data.data || res.data || { books: [], authors: [], podcasts: [] };
+            
+            // Flatten books if they're nested in categories (like home page data)
+            let books = data.books || [];
+            if (data.categoryWithBooks && Array.isArray(data.categoryWithBooks)) {
+                // Flatten books from categories
+                books = data.categoryWithBooks.flatMap(category => category.books || []);
+            }
+            
+            return {
+                books: books,
+                authors: data.authors || [],
+                podcasts: data.podcasts || []
+            };
         }
         catch (error) {
             console.log('Search error:', error);

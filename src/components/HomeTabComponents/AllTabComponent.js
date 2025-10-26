@@ -8,6 +8,7 @@ import { colors } from '../../constants/colors';
 const AllTabComponent = ({ homeData }) => {
   const { token } = useAuth();
   const navigate = useNavigate();
+  const [comingSoonIndex, setComingSoonIndex] = useState(0);
 
   if (!homeData) {
     return <div style={{ padding: 24, textAlign: 'center', color: '#888' }}>No data available.</div>;
@@ -373,7 +374,7 @@ const AllTabComponent = ({ homeData }) => {
 
   // Videos Section
   const VideosSection = () => {
-    const videos = homeData?.ads?.filter(ad => ad.type === 'Video') || [];
+    const videos = []
 
     if (!videos.length) return null;
 
@@ -425,34 +426,264 @@ const AllTabComponent = ({ homeData }) => {
 
   // Coming Soon Section
   const ComingSoonSection = () => {
-    const coming = (homeData.coming_soon || [])[0];
-    if (!coming) return null;
+    const comingSoonItems = homeData.coming_soon || [];
+    if (!comingSoonItems.length) return null;
+    
+    const currentItem = comingSoonItems[comingSoonIndex];
+    
+    const goToNext = () => {
+      setComingSoonIndex((prev) => (prev + 1) % comingSoonItems.length);
+    };
+    
+    const goToPrev = () => {
+      setComingSoonIndex((prev) => (prev - 1 + comingSoonItems.length) % comingSoonItems.length);
+    };
+    
+    const handleCardClick = () => {
+      if (currentItem && currentItem.id) {
+        navigate(`/book/${currentItem.id}`);
+      }
+    };
+    
     return (
       <div style={{ margin: '32px 0 0 0' }}>
-        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 10 }}>Coming Soon</div>
-        <div style={{ borderRadius: 16, overflow: 'hidden', width: '100%', maxWidth: 340 }}>
-          <img
-            src={coming.coverimage ? `${FILE_BASE_URL}${coming.coverimage}` : '/favicon.ico'}
-            alt={coming.title}
-            style={{ width: '100%', height: 180, objectFit: 'cover', display: 'block' }}
-            onError={(e) => {
-              e.target.src = '/favicon.ico';
-            }}
-          />
+        {/* Section Header with "Coming Soon" badge */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: 12
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #FF6B6B 0%, #EE5A52 100%)',
+            padding: '6px 18px',
+            borderRadius: 20,
+            boxShadow: '0 2px 8px rgba(255, 107, 107, 0.3)'
+          }}>
+            <span style={{
+              color: 'white',
+              fontSize: 13,
+              fontWeight: 700,
+              letterSpacing: '0.5px',
+              textTransform: 'uppercase'
+            }}>
+              Coming Soon
+            </span>
+          </div>
+          
+          {/* Carousel Indicators */}
+          {comingSoonItems.length > 1 && (
+            <div style={{
+              display: 'flex',
+              gap: 8,
+              alignItems: 'center'
+            }}>
+              {comingSoonItems.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setComingSoonIndex(index);
+                  }}
+                  style={{
+                    width: index === comingSoonIndex ? 24 : 8,
+                    height: 8,
+                    borderRadius: 4,
+                    border: 'none',
+                    background: index === comingSoonIndex ? '#FF6B6B' : '#D0D0D0',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    padding: 0
+                  }}
+                />
+              ))}
+            </div>
+          )}
         </div>
-        <div style={{ fontWeight: 700, fontSize: 20, marginTop: 10, color: '#e7440d' }}>{coming.title}</div>
+        
+        {/* Image Card with Carousel */}
+        <div 
+          onClick={handleCardClick}
+          style={{ 
+            position: 'relative',
+            width: '100%',
+            borderRadius: 20,
+            overflow: 'hidden',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+            cursor: 'pointer',
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-4px)';
+            e.currentTarget.style.boxShadow = '0 12px 40px rgba(0, 0, 0, 0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 8px 32px rgba(0, 0, 0, 0.15)';
+          }}
+        >
+          {/* Image Container */}
+          <div style={{ 
+            position: 'relative',
+            width: '100%',
+            paddingBottom: '140%', // 5:7 aspect ratio
+            overflow: 'hidden',
+            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+          }}>
+            <img
+              src={currentItem.coverimage ? `${FILE_BASE_URL}${currentItem.coverimage}` : '/logo192.png'}
+              alt={currentItem.title}
+              style={{ 
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                objectPosition: 'center'
+              }}
+              onError={(e) => {
+                e.target.src = '/logo192.png';
+              }}
+            />
+            
+            {/* Gradient Overlay */}
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '60%',
+              background: 'linear-gradient(to top, rgba(0, 0, 0, 0.85) 0%, rgba(0, 0, 0, 0.3) 50%, transparent 100%)',
+              pointerEvents: 'none'
+            }}></div>
+            
+            {/* Navigation Arrows (if multiple items) */}
+            {comingSoonItems.length > 1 && (
+              <>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToPrev();
+                  }}
+                  style={{
+                    position: 'absolute',
+                    left: 16,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    backdropFilter: 'blur(10px)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: 40,
+                    height: 40,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    zIndex: 10,
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.3)'; }}
+                  onMouseLeave={(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.2)'; }}
+                >
+                  <span style={{ fontSize: 20, color: 'white' }}>‹</span>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goToNext();
+                  }}
+                  style={{
+                    position: 'absolute',
+                    right: 16,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    backdropFilter: 'blur(10px)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: 40,
+                    height: 40,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    zIndex: 10,
+                    transition: 'all 0.3s ease'
+                  }}
+                  onMouseEnter={(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.3)'; }}
+                  onMouseLeave={(e) => { e.target.style.background = 'rgba(255, 255, 255, 0.2)'; }}
+                >
+                  <span style={{ fontSize: 20, color: 'white' }}>›</span>
+                </button>
+              </>
+            )}
+            
+            {/* Book Info at Bottom */}
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              padding: '24px 20px',
+              color: 'white'
+            }}>
+              <h2 style={{
+                fontSize: 28,
+                fontWeight: 800,
+                margin: '0 0 8px 0',
+                textShadow: '0 2px 12px rgba(0, 0, 0, 0.5)',
+                lineHeight: '1.2',
+                letterSpacing: '-0.5px'
+              }}>
+                {currentItem.title}
+              </h2>
+              
+              {/* Author or Additional Info */}
+              {currentItem.author && (
+                <div style={{
+                  fontSize: 14,
+                  fontWeight: 500,
+                  opacity: 0.95,
+                  textShadow: '0 1px 6px rgba(0, 0, 0, 0.4)'
+                }}>
+                  {typeof currentItem.author === 'object' ? currentItem.author.name : currentItem.author}
+                </div>
+              )}
+              
+              {/* Sparkle Decoration */}
+              <div style={{
+                marginTop: 12,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8
+              }}>
+                <span style={{ fontSize: 18, filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))' }}>✨</span>
+                <span style={{ 
+                  fontSize: 13, 
+                  fontWeight: 600,
+                  opacity: 0.9,
+                  textShadow: '0 1px 4px rgba(0, 0, 0, 0.4)'
+                }}>
+                  Anticipated Release
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   };
 
-  // Readers Section
-  const ReadersSection = () => {
-    const readers = homeData.readers || [];
-    if (!readers.length) return null;
+  // Top Authors Section - from top_played_author
+  const TopAuthorsSection = () => {
+    const topAuthors = homeData.top_played_author || [];
+    if (!topAuthors.length) return null;
     
     return (
       <div style={{ margin: '32px 0 0 0' }}>
-        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 10 }}>Readers</div>
+        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 10 }}>Top Authors</div>
         <div style={{ 
           display: 'flex', 
           gap: 16, 
@@ -462,19 +693,251 @@ const AllTabComponent = ({ homeData }) => {
           scrollbarWidth: 'none',
           msOverflowStyle: 'none'
         }}>
-          {readers.map((reader) => (
-            <div key={reader.id} style={{ minWidth: 120, textAlign: 'center' }}>
-              <img
-                src={reader.image ? `${FILE_BASE_URL}${reader.image}` : '/favicon.ico'}
-                alt={reader.name}
-                style={{ width: 80, height: 80, borderRadius: '50%', objectFit: 'cover', marginBottom: 8 }}
-                onError={(e) => {
-                  e.target.src = '/favicon.ico';
+          {topAuthors.map((item, index) => {
+            const author = item.author || item;
+            const authorId = author.id || index;
+            const authorName = author.name || 'Unknown Author';
+            const youtubeUrl = author.youtube || author.youtube_url || author.youtube_channel || null;
+            const profileImage = author.image ? `${FILE_BASE_URL}${author.image}` : 
+                                 author.profile_image ? `${FILE_BASE_URL}${author.profile_image}` : 
+                                 '/logo192.png';
+            
+            const handleClick = () => {
+              if (youtubeUrl) {
+                const url = youtubeUrl.startsWith('http') ? youtubeUrl : `https://${youtubeUrl}`;
+                window.open(url, '_blank');
+              }
+            };
+            
+            return (
+              <div 
+                key={authorId} 
+                onClick={handleClick}
+                style={{ 
+                  minWidth: 120, 
+                  minHeight: youtubeUrl ? 155 : 130,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  cursor: youtubeUrl ? 'pointer' : 'default',
+                  transition: 'all 0.2s ease',
+                  padding: '12px 8px',
+                  borderRadius: '12px',
+                  backgroundColor: 'transparent',
+                  boxSizing: 'border-box'
                 }}
-              />
-              <div style={{ fontSize: 14, fontWeight: 500 }}>{reader.name}</div>
-            </div>
-          ))}
+                onMouseEnter={(e) => {
+                  if (youtubeUrl) {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.backgroundColor = '#fff5f3';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <img
+                  src={profileImage}
+                  alt={authorName}
+                  style={{ 
+                    width: 80, 
+                    height: 80, 
+                    borderRadius: '50%', 
+                    objectFit: 'cover', 
+                    marginBottom: 10,
+                    border: youtubeUrl ? '2px solid #e7440d' : 'none',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onError={(e) => {
+                    e.target.src = '/logo192.png';
+                  }}
+                />
+                <div style={{ 
+                  fontSize: 14, 
+                  fontWeight: 500, 
+                  marginBottom: youtubeUrl ? 6 : 0, 
+                  lineHeight: 1.3,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '100%',
+                  width: '100%'
+                }}>
+                  {authorName}
+                </div>
+                {youtubeUrl && (
+                  <div style={{ fontSize: 10, color: '#e7440d', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                    <span>▶️</span> View YouTube
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Top Books Section - from top_played_book
+  const TopBooksSection = () => {
+    const topBooks = homeData.top_played_book || [];
+    if (!topBooks.length) return null;
+    
+    return (
+      <div style={{ margin: '32px 0 0 0' }}>
+        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 10 }}>Top Books</div>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', 
+          gap: 16 
+        }}>
+          {topBooks.map((item, index) => {
+            const book = item.book || item;
+            const bookId = book.id || index;
+            
+            // Get author name safely
+            const authorName = getAuthorName(book.author, book.author_name);
+            
+            // Get image URL
+            const imageUrl = getImageUrl(book.coverimage, book.image);
+            
+            const handleClick = () => {
+              navigate(`/book/${bookId}`);
+            };
+            
+            return (
+              <div 
+                key={bookId} 
+                style={{ cursor: 'pointer' }}
+                onClick={handleClick}
+              >
+                <img
+                  src={imageUrl}
+                  alt={book.title}
+                  style={{ 
+                    width: '100%', 
+                    height: 240, 
+                    borderRadius: 8, 
+                    objectFit: 'cover',
+                    marginBottom: 8
+                  }}
+                  onError={(e) => {
+                    e.target.src = '/logo192.png';
+                  }}
+                />
+                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>
+                  {book.title || 'Untitled'}
+                </div>
+                <div style={{ fontSize: 12, color: '#666' }}>by {authorName}</div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // Top Readers Section - from top_played_reader
+  const TopReadersSection = () => {
+    const topReaders = homeData.top_played_reader || [];
+    if (!topReaders.length) return null;
+    
+    return (
+      <div style={{ margin: '32px 0 0 0' }}>
+        <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 10 }}>Top Readers</div>
+        <div style={{ 
+          display: 'flex', 
+          gap: 16, 
+          overflowX: 'auto', 
+          paddingBottom: 8,
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}>
+          {topReaders.map((item, index) => {
+            const reader = item.reader || item;
+            const readerId = reader.id || index;
+            const readerName = reader.name || 'Unknown Reader';
+            const youtubeUrl = reader.youtube || reader.youtube_url || reader.youtube_channel || null;
+            const profileImage = reader.image ? `${FILE_BASE_URL}${reader.image}` : 
+                                 reader.profile_image ? `${FILE_BASE_URL}${reader.profile_image}` : 
+                                 '/logo192.png';
+            
+            const handleClick = () => {
+              if (youtubeUrl) {
+                const url = youtubeUrl.startsWith('http') ? youtubeUrl : `https://${youtubeUrl}`;
+                window.open(url, '_blank');
+              }
+            };
+            
+            return (
+              <div 
+                key={readerId} 
+                onClick={handleClick}
+                style={{ 
+                  minWidth: 120, 
+                  minHeight: youtubeUrl ? 155 : 130,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  cursor: youtubeUrl ? 'pointer' : 'default',
+                  transition: 'all 0.2s ease',
+                  padding: '12px 8px',
+                  borderRadius: '12px',
+                  backgroundColor: 'transparent',
+                  boxSizing: 'border-box'
+                }}
+                onMouseEnter={(e) => {
+                  if (youtubeUrl) {
+                    e.currentTarget.style.transform = 'translateY(-4px)';
+                    e.currentTarget.style.backgroundColor = '#fff5f3';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <img
+                  src={profileImage}
+                  alt={readerName}
+                  style={{ 
+                    width: 80, 
+                    height: 80, 
+                    borderRadius: '50%', 
+                    objectFit: 'cover', 
+                    marginBottom: 10,
+                    border: youtubeUrl ? '2px solid #e7440d' : 'none',
+                    transition: 'all 0.2s ease'
+                  }}
+                  onError={(e) => {
+                    e.target.src = '/logo192.png';
+                  }}
+                />
+                <div style={{ 
+                  fontSize: 14, 
+                  fontWeight: 500, 
+                  marginBottom: youtubeUrl ? 6 : 0, 
+                  lineHeight: 1.3,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  maxWidth: '100%',
+                  width: '100%'
+                }}>
+                  {readerName}
+                </div>
+                {youtubeUrl && (
+                  <div style={{ fontSize: 10, color: '#e7440d', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                    <span>▶️</span> View YouTube
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     );
@@ -488,14 +951,16 @@ const AllTabComponent = ({ homeData }) => {
       WebkitOverflowScrolling: 'touch'
     }}>
       <AdsSection />
+      <TopAuthorsSection />
       <NewBooksSection />
+      <TopBooksSection />
+      <TopReadersSection />
       <AudiobooksSection />
       <EbooksSection />
       <MagazinesSection />
       <PodcastsSection />
       <VideosSection />
       <ComingSoonSection />
-      <ReadersSection />
     </div>
   );
 };
