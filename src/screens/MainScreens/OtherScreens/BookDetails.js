@@ -7,6 +7,7 @@ import { commonStyles } from '../../../constants/commonStyles';
 import BookCard from '../../../components/BookCard';
 import AudioPlayer from '../../../components/AudioPlayer/AudioPlayer';
 import { useAudioPlayer } from '../../../context/AudioPlayerContext';
+import InAppViewer from '../../../components/InAppViewer/InAppViewer';
 
 const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 const FALLBACK_IMAGE = '/favicon.ico';
@@ -25,6 +26,8 @@ const BookDetails = () => {
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
     const [moreBooks, setMoreBooks] = useState([]);
+    const [showInAppViewer, setShowInAppViewer] = useState(false);
+    const [viewerFile, setViewerFile] = useState(null);
     const { playTrack } = useAudioPlayer();
 
     useEffect(() => {
@@ -74,6 +77,26 @@ const BookDetails = () => {
                 audio_url: (book.bookaudio.startsWith('http') ? book.bookaudio : FILE_BASE_URL + book.bookaudio),
             });
         }
+    };
+
+    const handleOpenBook = () => {
+        if (book?.bookfile) {
+            const fileUrl = FILE_BASE_URL + book.bookfile;
+            const fileName = book.title || 'Book';
+            const fileType = book.file_type || book.type || 'pdf';
+            
+            setViewerFile({
+                url: fileUrl,
+                name: fileName,
+                type: fileType
+            });
+            setShowInAppViewer(true);
+        }
+    };
+
+    const handleCloseViewer = () => {
+        setShowInAppViewer(false);
+        setViewerFile(null);
     };
 
     const handleLike = async () => {
@@ -321,20 +344,7 @@ const BookDetails = () => {
                             )}
                             {book.bookfile && (
                                 <button
-                                    onClick={() => {
-                                        try {
-                                            // Try opening in new window first
-                                            const link = window.open(FILE_BASE_URL + book.bookfile, '_blank');
-                                            
-                                            // If that fails (e.g., blocked by iframe), redirect current window
-                                            if (!link || link.closed || typeof link.closed === 'undefined') {
-                                                window.location.href = FILE_BASE_URL + book.bookfile;
-                                            }
-                                        } catch (error) {
-                                            // Fallback: redirect current window
-                                            window.location.href = FILE_BASE_URL + book.bookfile;
-                                        }
-                                    }}
+                                    onClick={handleOpenBook}
                                     style={{
                                         padding: '8px 16px',
                                         backgroundColor: colors.white,
@@ -572,6 +582,16 @@ const BookDetails = () => {
 
             {/* Render AudioPlayer only if audio is playing */}
             <AudioPlayer />
+
+            {/* In-App Viewer */}
+            {showInAppViewer && viewerFile && (
+                <InAppViewer
+                    fileUrl={viewerFile.url}
+                    fileName={viewerFile.name}
+                    fileType={viewerFile.type}
+                    onClose={handleCloseViewer}
+                />
+            )}
         </div>
     );
 };

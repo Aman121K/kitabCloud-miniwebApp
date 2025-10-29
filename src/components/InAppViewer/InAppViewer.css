@@ -1,0 +1,148 @@
+/* InAppViewer Styles */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.in-app-viewer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+}
+
+.in-app-viewer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #e0e0e0;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.in-app-viewer-title {
+    font-weight: 600;
+    font-size: 16px;
+    margin: 0;
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.in-app-viewer-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.in-app-viewer-content {
+    flex: 1;
+    overflow: hidden;
+}
+
+.in-app-viewer-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.in-app-viewer-image-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 20px;
+}
+
+.in-app-viewer-image {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.in-app-viewer-error-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 20px;
+    text-align: center;
+}
+
+.in-app-viewer-loading-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.in-app-viewer-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid #e0e0e0;
+    border-top: 3px solid #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.in-app-viewer-download-btn {
+    padding: 6px 12px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.2s;
+}
+
+.in-app-viewer-download-btn:hover {
+    background-color: #0056b3;
+}
+
+.in-app-viewer-close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px;
+    color: #666;
+    transition: color 0.2s;
+}
+
+.in-app-viewer-close-btn:hover {
+    color: #333;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 768px) {
+    .in-app-viewer-header {
+        padding: 10px 12px;
+    }
+    
+    .in-app-viewer-title {
+        font-size: 14px;
+    }
+    
+    .in-app-viewer-download-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+    
+    .in-app-viewer-close-btn {
+        font-size: 20px;
+    }
+}
