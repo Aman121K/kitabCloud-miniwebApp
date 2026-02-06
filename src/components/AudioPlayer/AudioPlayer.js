@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAudioPlayer } from '../../context/AudioPlayerContext';
 import { colors } from '../../constants/colors';
-import { commonStyles } from '../../constants/commonStyles';
 import './AudioPlayer.css';
 
 const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 // Use local logo as fallback to avoid remote loading issues
 const KITABCLOUD_LOGO = '/logo192.png'; // Local logo that won't flicker
-const KITABCLOUD_LOGO_REMOTE = "https://usercontent.one/wp/kitabcloud.se/wp-content/uploads/2022/04/kitab.jpg";
 
 const AudioPlayer = () => {
     const {
@@ -16,14 +14,11 @@ const AudioPlayer = () => {
         currentTime,
         duration,
         volume,
-        currentIndex,
         playlist,
         isShuffled,
         isRepeated,
-        playTrack,
         pause,
         resume,
-        stop,
         seekByPercentage,
         playNext,
         playPrevious,
