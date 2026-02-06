@@ -20,6 +20,7 @@ const AllVideosPage = () => {
         if (token) {
             fetchAllVideos();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     const fetchAllVideos = async () => {

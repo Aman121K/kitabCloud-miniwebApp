@@ -8,7 +8,7 @@ import { commonStyles } from '../constants/commonStyles';
 
 const BookCard = ({ book }) => {
     const { token } = useAuth();
-    const { playTrack, currentTrack, isPlaying } = useAudioPlayer();
+    const { playTrack, currentTrack } = useAudioPlayer();
     const navigate = useNavigate();
     const [isLiked, setIsLiked] = useState(book.is_liked || false);
     const [isLikeLoading, setIsLikeLoading] = useState(false);
@@ -36,63 +36,6 @@ const BookCard = ({ book }) => {
             // Don't change state on error
         } finally {
             setIsLikeLoading(false);
-        }
-    };
-
-    const handlePlay = (e) => {
-        e.stopPropagation();
-        if (book.audio_url || book.bookaudio) {
-            // Safely get author name
-            let authorName = 'Unknown Author';
-            if (typeof book.author === 'string') {
-                authorName = book.author;
-            } else if (book.author && typeof book.author === 'object' && book.author.name) {
-                authorName = book.author.name;
-            } else if (book.author_name) {
-                authorName = book.author_name;
-            }
-            
-            // Create a proper track object with string author and proper image URLs
-            const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
-            const getImageUrl = (imgPath) => {
-                if (!imgPath) return null;
-                if (imgPath.startsWith('http')) return imgPath;
-                return `${FILE_BASE_URL}${imgPath}`;
-            };
-            
-            const track = {
-                id: book.id,
-                title: book.title || 'Untitled',
-                author: authorName,
-                author_name: book.author_name || authorName,
-                cover_image: getImageUrl(book.coverimage) || getImageUrl(book.image) || '/logo192.png',
-                image: getImageUrl(book.image),
-                audio_url: book.audio_url || book.bookaudio
-            };
-            
-            // Try to get sibling tracks from the DOM context (same parent container)
-            let contextTracks = [];
-            try {
-                const cardElement = e.currentTarget.closest('[data-track-container]');
-                if (cardElement) {
-                    const allCards = Array.from(cardElement.parentElement.children);
-                    contextTracks = allCards
-                        .map(el => el.querySelector('[data-track]'))
-                        .filter(Boolean)
-                        .map(dataTrack => {
-                            try {
-                                return JSON.parse(dataTrack.dataset.track);
-                            } catch {
-                                return null;
-                            }
-                        })
-                        .filter(Boolean);
-                }
-            } catch (err) {
-                console.log('Could not get context tracks:', err);
-            }
-            
-            playTrack(track, 0, contextTracks);
         }
     };
 

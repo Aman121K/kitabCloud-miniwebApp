@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { apiFunctions } from '../../../apiService/apiFunctions';
 import { colors } from '../../../constants/colors';
 import { commonStyles } from '../../../constants/commonStyles';
-import BookCard from '../../../components/BookCard';
 import AudioPlayer from '../../../components/AudioPlayer/AudioPlayer';
 import { useAudioPlayer } from '../../../context/AudioPlayerContext';
 import InAppViewer from '../../../components/InAppViewer/InAppViewer';
@@ -25,19 +24,11 @@ const BookDetails = () => {
     const [userReview, setUserReview] = useState('');
     const [showReviewModal, setShowReviewModal] = useState(false);
     const [isSubmittingReview, setIsSubmittingReview] = useState(false);
-    const [moreBooks, setMoreBooks] = useState([]);
     const [showInAppViewer, setShowInAppViewer] = useState(false);
     const [viewerFile, setViewerFile] = useState(null);
     const { playTrack } = useAudioPlayer();
 
-    useEffect(() => {
-        if (token && id) {
-            fetchBookDetails();
-            fetchReviews();
-        }
-    }, [token, id]);
-
-    const fetchBookDetails = async () => {
+    const fetchBookDetails = useCallback(async () => {
         try {
             setLoading(true);
             setError(null);
@@ -53,7 +44,14 @@ const BookDetails = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id, token]);
+
+    useEffect(() => {
+        if (token && id) {
+            fetchBookDetails();
+            fetchReviews();
+        }
+    }, [token, id, fetchBookDetails]);
 
     const fetchReviews = async () => {
         try {
@@ -241,11 +239,6 @@ const BookDetails = () => {
         : (book.publisher?.name || 'Kitab Cloud originals');
     const releaseDate = formatDate(book.created_at) || formatDate(new Date());
     
-    // Get language from API response - can be from language object or language_id
-    const language = book.language?.name || 
-                     book.category?.category_name || 
-                     'Somali'; // Fallback to 'Somali' if not available
-    
     // Get book length from API - can be from book_length or length field
     // If not available, don't show "N/A" - just hide the field if not applicable
     const lengthInSeconds = book.book_length || book.length || null;
@@ -280,13 +273,6 @@ const BookDetails = () => {
 
     // Reviews to show (only real reviews, no hardcoded data)
     const reviewsToShow = reviews.slice(0, 2);
-
-    // Placeholder more books
-    const moreBooksToShow = moreBooks.length > 0 ? moreBooks : [
-        { id: 1, title: 'Moaarynto D...', author: { name: authorName }, image: '', rating: 4 },
-        { id: 2, title: 'Moaarynto D...', author: { name: authorName }, image: '', rating: 4 },
-        { id: 3, title: 'Moaarynto D...', author: { name: authorName }, image: '', rating: 4 }
-    ];
 
     return (
         <div style={{ ...commonStyles.fullScreenContainer, background: colors.white, minHeight: '100vh', paddingBottom: 80 }}>

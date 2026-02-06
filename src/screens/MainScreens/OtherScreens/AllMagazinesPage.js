@@ -20,6 +20,7 @@ const AllMagazinesPage = () => {
         if (token) {
             fetchAllMagazines();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     const fetchAllMagazines = async () => {

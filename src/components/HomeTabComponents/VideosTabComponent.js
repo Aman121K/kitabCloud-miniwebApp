@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { apiFunctions } from '../../apiService/apiFunctions';
 import { colors } from '../../constants/colors';
 import BookCard from '../BookCard';
 import EmptyState from '../EmptyState';
@@ -10,7 +8,6 @@ const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 const KITABCLOUD_LOGO = '/logo192.png'; // Local logo fallback
 
 const VideosTabComponent = ({ homeData }) => {
-    const { token } = useAuth();
     const navigate = useNavigate();
 
     // Extract videos from homeData - videos might be in ads or other sections

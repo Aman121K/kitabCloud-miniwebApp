@@ -75,6 +75,7 @@ export const DataProvider = ({ children }) => {
         } finally {
             setHomeDataLoading(false);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [homeData, homeDataTimestamp]);
 
     // Fetch liked books with caching
@@ -112,6 +113,7 @@ export const DataProvider = ({ children }) => {
         } finally {
             setLikedBooksLoading(false);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [likedBooks, likedBooksTimestamp]);
 
     // Clear all cached data
@@ -195,6 +197,7 @@ export const DataProvider = ({ children }) => {
         } finally {
             setAllBooksLoading(false);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [allBooks, allBooksTimestamp]);
 
     // Refresh all books (force fetch)

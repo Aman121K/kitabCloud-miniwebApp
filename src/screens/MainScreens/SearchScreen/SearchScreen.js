@@ -14,7 +14,6 @@ const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 const SearchScreen = () => {
     const { token } = useAuth();
     const location = useLocation();
-    const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState({});
     const [allBooks, setAllBooks] = useState([]);

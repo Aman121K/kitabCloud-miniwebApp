@@ -36,6 +36,7 @@ const AllAudiobooksPage = () => {
         } else {
             setFilteredAudiobooks(audiobooks);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [searchQuery, audiobooks]);
 
     const fetchAllAudiobooks = async () => {

@@ -1,13 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { apiFunctions } from '../../apiService/apiFunctions';
 import BookCard from '../BookCard';
 
 const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 
 const AudioBooksTabComponent = ({ homeData }) => {
-    const { token } = useAuth();
     const navigate = useNavigate();
 
     // Extract audiobooks from homeData

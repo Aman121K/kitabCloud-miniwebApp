@@ -11,7 +11,7 @@ import BottomNavigation from '../../../components/BottomNavigation';
 const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 
 const ProfileScreen = () => {
-    const { user, token, logout } = useAuth();
+    const { token, logout } = useAuth();
     const { likedBooks: cachedLikedBooks, fetchLikedBooks: fetchCachedLikedBooks } = useData();
     const navigate = useNavigate();
     const [userData, setUserData] = useState(null);
@@ -37,6 +37,7 @@ const ProfileScreen = () => {
                 fetchCachedLikedBooks(token);
             }
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     const fetchUserData = async () => {

@@ -17,7 +17,7 @@ export const AudioPlayerProvider = ({ children }) => {
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(1);
     const [playlist, setPlaylist] = useState([]);
-    const [originalPlaylist, setOriginalPlaylist] = useState([]); // For shuffle
+    // const [originalPlaylist, setOriginalPlaylist] = useState([]); // For shuffle - unused
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isShuffled, setIsShuffled] = useState(false);
     const [isRepeated, setIsRepeated] = useState(false);
@@ -84,15 +84,15 @@ export const AudioPlayerProvider = ({ children }) => {
         };
     }, [volume, handleLoadedMetadata, handleTimeUpdate, handleEnded, handleError, audio]);
 
-    // Shuffle playlist utility
-    const shuffleArray = (array) => {
-        const shuffled = [...array];
-        for (let i = shuffled.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-        }
-        return shuffled;
-    };
+    // Shuffle playlist utility - unused
+    // const shuffleArray = (array) => {
+    //     const shuffled = [...array];
+    //     for (let i = shuffled.length - 1; i > 0; i--) {
+    //         const j = Math.floor(Math.random() * (i + 1));
+    //         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    //     }
+    //     return shuffled;
+    // };
 
     const playTrack = async (track, index = 0, contextTracks = []) => {
         try {
@@ -164,6 +164,7 @@ export const AudioPlayerProvider = ({ children }) => {
     const pause = useCallback(() => {
         audio.pause();
         setIsPlaying(false);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const resume = useCallback(async () => {
@@ -173,6 +174,7 @@ export const AudioPlayerProvider = ({ children }) => {
         } catch (error) {
             console.error('Error resuming:', error);
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const stop = () => {
@@ -208,6 +210,7 @@ export const AudioPlayerProvider = ({ children }) => {
         }
         
         await playTrack(playlist[nextIndex], nextIndex);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [playlist, currentIndex, isShuffled]);
 
     const playPrevious = useCallback(async () => {
@@ -226,6 +229,7 @@ export const AudioPlayerProvider = ({ children }) => {
         }
         
         await playTrack(playlist[prevIndex], prevIndex);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [playlist, currentIndex, isShuffled]);
 
     const setVolumeLevel = (newVolume) => {

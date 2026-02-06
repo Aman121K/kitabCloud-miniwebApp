@@ -178,7 +178,7 @@ const ForgotPassword = () => {
 
         try {
             setIsLoading(true);
-            const response = await apiFunctions.forgotPassword({ email });
+            await apiFunctions.forgotPassword({ email });
             setIsLoading(false);
             
             setSuccessMessage('Password reset instructions have been sent to your email');

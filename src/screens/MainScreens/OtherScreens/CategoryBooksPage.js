@@ -2,7 +2,6 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
 import { useData } from '../../../context/DataContext';
-import { apiFunctions } from '../../../apiService/apiFunctions';
 import BookCard from '../../../components/BookCard';
 import EmptyState from '../../../components/EmptyState';
 import BackButton from '../../../components/BackButton';
@@ -12,7 +11,6 @@ const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 
 const CategoryBooksPage = () => {
     const { categoryName } = useParams();
-    const navigate = useNavigate();
     const { token } = useAuth();
     const { homeData, fetchHomeData } = useData();
 

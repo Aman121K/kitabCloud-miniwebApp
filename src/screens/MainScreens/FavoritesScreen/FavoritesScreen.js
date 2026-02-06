@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../../context/AuthContext';
 import { useData } from '../../../context/DataContext';
-import { apiFunctions } from '../../../apiService/apiFunctions';
-import { colors } from '../../../constants/colors';
 import BookCard from '../../../components/BookCard';
 import EmptyState from '../../../components/EmptyState';
 import BottomNavigation from '../../../components/BottomNavigation';
@@ -13,18 +10,11 @@ const FILE_BASE_URL = 'https://api.kitabcloud.se/storage/';
 const FavoritesScreen = () => {
     const { token } = useAuth();
     const { fetchLikedBooks } = useData();
-    const navigate = useNavigate();
     const [favorites, setFavorites] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
-    useEffect(() => {
-        if (token) {
-            fetchFavorites();
-        }
-    }, [token]);
-
-    const fetchFavorites = async () => {
+    const fetchFavorites = useCallback(async () => {
         try {
             setLoading(true);
             setError(false);
@@ -45,7 +35,13 @@ const FavoritesScreen = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [token, fetchLikedBooks]);
+
+    useEffect(() => {
+        if (token) {
+            fetchFavorites();
+        }
+    }, [token, fetchFavorites]);
 
     const validFavorites = favorites.filter(fav => fav && fav.id);
 

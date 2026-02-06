@@ -20,6 +20,7 @@ const AllPodcastsPage = () => {
         if (token) {
             fetchAllPodcasts();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     const fetchAllPodcasts = async () => {

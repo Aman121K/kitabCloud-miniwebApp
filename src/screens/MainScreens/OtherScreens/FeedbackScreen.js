@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { apiFunctions } from '../../../apiService/apiFunctions';
 import CommonButton from '../../../components/CommonButton';
 import { colors } from '../../../constants/colors';
 import { commonStyles } from '../../../constants/commonStyles';

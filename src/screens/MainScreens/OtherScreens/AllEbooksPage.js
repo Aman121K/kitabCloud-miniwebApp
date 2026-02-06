@@ -20,6 +20,7 @@ const AllEbooksPage = () => {
         if (token) {
             fetchAllEbooks();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [token]);
 
     const fetchAllEbooks = async () => {
