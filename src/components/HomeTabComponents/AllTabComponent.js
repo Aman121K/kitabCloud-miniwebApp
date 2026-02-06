@@ -155,6 +155,128 @@ const AllTabComponent = ({ homeData }) => {
     );
   };
 
+  // Kiswahili Books Section - Filter books from Kiswahili category
+  const KiswahiliBooksSection = () => {
+    // Safety check for homeData
+    if (!homeData) {
+      console.log('KiswahiliBooksSection: homeData is not available');
+      return null;
+    }
+    
+    if (!homeData.categoryWithBooks || !Array.isArray(homeData.categoryWithBooks)) {
+      console.log('KiswahiliBooksSection: categoryWithBooks is not available or not an array', homeData);
+      return null;
+    }
+    
+    const categories = homeData.categoryWithBooks || [];
+    
+    // Find Kiswahili category (case-insensitive match with multiple variations)
+    let kiswahiliCategory = categories.find(cat => {
+      const categoryName = (cat.name || cat.category_name || '').toLowerCase();
+      // Check for various Kiswahili/Swahili variations
+      return categoryName.includes('kiswahili') || 
+             categoryName.includes('swahili') ||
+             categoryName === 'kiswahili books' ||
+             categoryName === 'swahili books';
+    });
+    
+    // If category not found, try to find by checking all categories
+    if (!kiswahiliCategory && categories.length > 0) {
+      // Log available categories for debugging
+      console.log('Available categories:', categories.map(cat => ({
+        name: cat.name || cat.category_name,
+        id: cat.id
+      })));
+      
+      // Try alternative matching - look for any category with "kiswahili" or "swahili" in any form
+      kiswahiliCategory = categories.find(cat => {
+        const categoryName = (cat.name || cat.category_name || '').toLowerCase();
+        const searchTerms = ['kiswahili', 'swahili', 'kiswahili books', 'swahili books'];
+        return searchTerms.some(term => categoryName.includes(term));
+      });
+    }
+    
+    // Get books from the found category
+    let kiswahiliBooks = kiswahiliCategory?.books || [];
+    
+    // If still no books, try filtering all books by language field (if available)
+    if (!kiswahiliBooks.length && categories.length > 0) {
+      const allBooks = categories.flatMap(cat => cat.books || []);
+      kiswahiliBooks = allBooks.filter(book => {
+        if (!book || !book.id) return false;
+        const language = (book.language?.name || book.language || '').toLowerCase();
+        return language.includes('kiswahili') || language.includes('swahili');
+      });
+    }
+    
+    const validBooks = kiswahiliBooks.filter(book => book && book.id);
+    
+    // Don't render if no books found
+    if (!validBooks.length) {
+      return null;
+    }
+
+    // Get category name for navigation
+    const categoryNameForNav = kiswahiliCategory?.name || 
+                                kiswahiliCategory?.category_name || 
+                                'Kiswahili Books';
+
+    // Handle navigation - if we have a category, navigate to it, otherwise navigate to all books
+    const handleSeeAll = () => {
+      if (kiswahiliCategory) {
+        navigate(`/category/${categoryNameForNav}`);
+      } else {
+        navigate('/all-books');
+      }
+    };
+
+    return (
+      <div style={{ margin: '28px 0 0 0' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+          <div style={{ fontWeight: 600, fontSize: 18 }}>Kiswahili Books</div>
+          <button
+            style={{ background: 'none', border: 'none', color: '#e7440d', fontWeight: 500, fontSize: 15, cursor: 'pointer' }}
+            onClick={handleSeeAll}
+          >
+            See All
+          </button>
+        </div>
+        <div style={{ 
+          display: 'flex', 
+          gap: 16, 
+          overflowX: 'auto', 
+          paddingBottom: 8,
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none'
+        }}>
+          {validBooks.map((book) => {
+            const authorName = getAuthorName(book.author, book.author_name);
+            const safeBook = {
+              id: book.id,
+              title: book.title || 'Untitled',
+              author: authorName,
+              author_name: authorName,
+              coverimage: getImageUrl(book.coverimage, book.image),
+              image: book.image ? `${FILE_BASE_URL}${book.image}` : book.image,
+              rating: book.rating || 0,
+              is_liked: book.is_liked || false,
+              audio_url: book.audio_url,
+              bookaudio: book.bookaudio ? `${FILE_BASE_URL}${book.bookaudio}` : book.bookaudio,
+              bookfile: book.bookfile ? `${FILE_BASE_URL}${book.bookfile}` : book.bookfile
+            };
+            
+            return (
+              <div key={book.id} style={{ minWidth: 160, maxWidth: 180 }}>
+                <BookCard book={safeBook} />
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   // Audiobooks Section
   const AudiobooksSection = () => {
     const categories = homeData?.categoryWithBooks || [];
@@ -1066,6 +1188,7 @@ const AllTabComponent = ({ homeData }) => {
       <AdsSection />
       <TopAuthorsSection />
       <NewBooksSection />
+      <KiswahiliBooksSection />
       <TopBooksSection />
       <TopReadersSection />
       <AudiobooksSection />

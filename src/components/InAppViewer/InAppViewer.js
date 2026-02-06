@@ -3,6 +3,7 @@ import { colors } from '../../constants/colors';
 import { commonStyles } from '../../constants/commonStyles';
 
 const InAppViewer = ({ fileUrl, fileName, fileType, onClose }) => {
+    console.log('fileUrl', fileUrl); // this conatin the real url of the file
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [pdfUrl, setPdfUrl] = useState(null);
