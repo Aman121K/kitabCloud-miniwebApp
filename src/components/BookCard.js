@@ -8,7 +8,7 @@ import { commonStyles } from '../constants/commonStyles';
 
 const BookCard = ({ book }) => {
     const { token } = useAuth();
-    const { playTrack, currentTrack } = useAudioPlayer();
+    const { currentTrack } = useAudioPlayer();
     const navigate = useNavigate();
     const [isLiked, setIsLiked] = useState(book.is_liked || false);
     const [isLikeLoading, setIsLikeLoading] = useState(false);

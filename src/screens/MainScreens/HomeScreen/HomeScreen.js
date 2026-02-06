@@ -16,7 +16,7 @@ const FilterData = ['All', 'Audiobooks', 'Ebooks', 'Videos', 'Magazines', 'Podca
 
 const HomeScreen = () => {
   const { token } = useAuth();
-  const { homeData, homeDataLoading, fetchHomeData } = useData();
+  const { homeData, fetchHomeData } = useData();
   const [userData, setUserData] = useState(null);
   const [selectedFilterTab, setSelectedFilterTab] = useState(FilterData[0]);
   const [loading, setLoading] = useState(true);

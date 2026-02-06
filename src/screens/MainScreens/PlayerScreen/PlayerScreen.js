@@ -4,8 +4,11 @@ import { commonStyles } from '../../../constants/commonStyles';
 
 const PlayerScreen = () => {
     const [currentTime, setCurrentTime] = useState(0);
+    // eslint-disable-next-line no-unused-vars
     const [duration, setDuration] = useState(0);
+    // eslint-disable-next-line no-unused-vars
     const [isPlaying, setIsPlaying] = useState(false);
+    // eslint-disable-next-line no-unused-vars
     const [audio, setAudio] = useState(null);
 
     useEffect(() => {

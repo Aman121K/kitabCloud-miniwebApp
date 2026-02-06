@@ -17,6 +17,7 @@ export const AudioPlayerProvider = ({ children }) => {
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(1);
     const [playlist, setPlaylist] = useState([]);
+    // eslint-disable-next-line no-unused-vars
     const [originalPlaylist, setOriginalPlaylist] = useState([]); // For shuffle
     const [currentIndex, setCurrentIndex] = useState(0);
     const [isShuffled, setIsShuffled] = useState(false);
