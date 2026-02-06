@@ -4,6 +4,9 @@ import { commonStyles } from '../../../constants/commonStyles';
 
 const PlayerScreen = () => {
     const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [audio, setAudio] = useState(null);
 
     useEffect(() => {
         // This would be connected to your global audio player
